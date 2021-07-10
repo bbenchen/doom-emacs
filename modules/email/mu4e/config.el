@@ -6,6 +6,8 @@
 (defvar +mu4e-personal-addresses 'nil
   "Alternative to mu4e-personal-addresses that can be set for each account (mu4e context).")
 
+(defvar +mu4e-capture-template t
+  "Whether to enable doom's builtin capture template for emails")
 
 ;;
 ;;; Packages
@@ -257,12 +259,21 @@ is non-nil."
   (when (fboundp 'imagemagick-register-types)
     (imagemagick-register-types))
 
+  ;; Add org capture template for TODO's tied to emails
+  (when (and (modulep! :lang org) +mu4e-capture-template)
+    (add-to-list 'org-capture-templates
+                 '("m" "email" entry
+                   (file+headline +org-capture-todo-file "Inbox")
+                   "* TODO %?\n- %a\n%i" :kill-buffer t :prepend t))
+    (add-to-list 'org-capture-templates-contexts
+                 '("m" ((in-mode . "mu4e-\\(view\\|headers\\)-mode"))))
+
+    (map! :map mu4e-headers-mode-map
+          :vne "l" (lambda () (interactive) (org-capture nil "m"))))
+
   (when (modulep! :ui workspaces)
     (map! :map mu4e-main-mode-map
           :ne "h" #'+workspace/other))
-
-  (map! :map mu4e-headers-mode-map
-        :vne "l" #'+mu4e/capture-msg-to-agenda)
 
   ;; Functionality otherwise obscured in mu4e 1.6
   (when (version<= "1.6" mu4e-mu-version)

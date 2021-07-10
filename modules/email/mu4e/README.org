@@ -213,6 +213,10 @@ If you send mail from various email aliases for different services,
 you are not replying to an email to or from one of the specified aliases, you
 will be prompted for an alias to send from.
 
+This module includes a capture template for Org tasks linking to emails.
+Pressing =l= on a message in the headers buffer will capture that message. It
+can be disabled by setting ~+mu4e-capture-template~ to ~nil~.
+
 *** Gmail
 With the [[doom-module:+gmail]] flag, integrations are applied which account for the different
 behaviour of Gmail.
