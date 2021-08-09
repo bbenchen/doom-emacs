@@ -607,12 +607,17 @@ to which Gmail integrations (behind the `+gmail' flag of the `mu4e' module) shou
 
 See `+mu4e-msg-gmail-p' and `mu4e-sent-messages-behavior'.")
 
+    (defvar +mu4e-office-365-accounts nil
+      "An alist of Office 365 addresses of the format
+\((\"username@domain.com\" . \"account-maildir\"))")
+
     ;; don't save message to Sent Messages, Gmail/IMAP takes care of this
     (setq mu4e-sent-messages-behavior
           (lambda () ;; TODO make use +mu4e-msg-gmail-p
             (if (or (string-match-p "@gmail.com\\'" (message-sendmail-envelope-from))
                     (member (message-sendmail-envelope-from)
-                            (mapcar #'car +mu4e-gmail-accounts)))
+                            (append (mapcar #'car +mu4e-gmail-accounts)
+                                    (mapcar #'car +mu4e-office-365-accounts))))
                 'delete 'sent)))
 
     (defun +mu4e-msg-gmail-p (msg)
