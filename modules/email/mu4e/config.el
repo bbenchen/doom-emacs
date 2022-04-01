@@ -466,9 +466,8 @@ Usefull for affecting HTML export config.")
     "Accent color to use in org-msg's generated CSS.
 Must be set before org-msg is loaded to take effect.")
   (setq org-msg-enforce-css
-        (let* ((font-family '(font-family . "-apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, Oxygen, Ubuntu, Cantarell,\
-        \"Fira Sans\", \"Droid Sans\", \"Helvetica Neue\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\";"))
-               (monospace-font '(font-family . "SFMono-Regular, Menlo, Monaco, Consolas, \"Liberation Mono\", \"Courier New\", monospace;"))
+        (let* ((font-family '(font-family . "sans-serif;"))
+               (monospace-font '(font-family . "monospace;"))
                (font-size '(font-size . "11pt"))
                (font `(,font-family ,font-size))
                (line-height '(line-height . "1.2"))
