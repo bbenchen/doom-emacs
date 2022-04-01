@@ -402,6 +402,9 @@
          :desc "Clone repo"                "R"   #'magit-clone
          :desc "Commit"                    "c"   #'magit-commit-create
          :desc "Fixup"                     "f"   #'magit-commit-fixup
+         :desc "Instant fixup"             "F"   #'magit-commit-instant-fixup
+         :desc "Squash"                     "s"   #'magit-commit-squash
+         :desc "Instant squash"             "S"   #'magit-commit-instant-squash
          :desc "Issue"                     "i"   #'forge-create-issue
          :desc "Pull request"              "p"   #'forge-create-pullreq)))
 
