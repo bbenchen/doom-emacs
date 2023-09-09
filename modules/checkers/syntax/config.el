@@ -91,7 +91,15 @@
   ;; as flymakes fail silently there is no need to activate it on a per major mode basis
   (add-hook! (prog-mode text-mode) #'flymake-mode)
   :config
-  (setq flymake-fringe-indicator-position 'right-fringe))
+  (setq flymake-fringe-indicator-position 'right-fringe)
+
+  (after! elisp-mode
+    (defadvice! +syntax--fix-elisp-flymake-load-path (orig-fn &rest args)
+      "Set load path for elisp byte compilation Flymake backend"
+      :around #'elisp-flymake-byte-compile
+      (let ((elisp-flymake-byte-compile-load-path
+             (append elisp-flymake-byte-compile-load-path load-path)))
+        (apply orig-fn args)))))
 
 
 (use-package! flymake-popon
