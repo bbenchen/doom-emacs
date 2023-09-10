@@ -1182,7 +1182,7 @@ Do:
      [...])
   #+END_SRC
 + Lazy load packages with ~use-package~'s ~:defer~ property.
-+ Use the ~featurep!~ macro to make some configuration conditional based on the
++ Use the ~modulep!~ macro to make some configuration conditional based on the
   state of another module or the presence of a flag.
 
 Don't:
@@ -1199,7 +1199,7 @@ Do:
 + Declare packages with the ~package!~ macro
 + Disable single packages with ~package!~'s ~:disable~ property or multiple
   packages with the ~disable-packages!~ macro.
-+ Use the ~featurep!~ macro to make packages conditional based on the state of
++ Use the ~modulep!~ macro to make packages conditional based on the state of
   another module or the presence of a flag.
 
 Don't:
@@ -1330,14 +1330,14 @@ prefixed with a ~+~ or a ~-~ to denote the addition or removal of a feature,
 respectively. There is no functional significance to this notation.
 
 A module may choose to interpret flags however it wishes, and can be tested for
-using the ~featurep!~ macro:
+using the ~modulep!~ macro:
 
 #+BEGIN_SRC elisp
 ;; Has the current module been enabled with the +my-feature flag?
-(when (featurep! +my-feature) ...)
+(when (modulep! +my-feature) ...)
 
 ;; It can be used to check the presence of flags in other modules:
-(when (featurep! :lang python +lsp) ...)
+(when (modulep! :lang python +lsp) ...)
 #+END_SRC
 
 Use this fact to make aspects of a module conditional. e.g. Prevent company
@@ -1361,7 +1361,7 @@ For example, say =file.el= is using a certain function that won't be available
 if the containing module wasn't enabled with a particular flag. We could safe
 guard against this with:
 #+BEGIN_SRC emacs-lisp
-;;;###if (featurep! +particular-flag)
+;;;###if (modulep! +particular-flag)
 #+END_SRC
 
 This will prevent errors at compile time or if/when that file is loaded.
