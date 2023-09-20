@@ -130,14 +130,20 @@ is non-nil."
             (cons (make-help-button text1 help-echo)
                   (make-help-button text2 help-echo))))
     (setq mu4e-headers-threaded-label
-          (make-help-button-cons "T" (concat " " (nerd-icons-octicon "nf-oct-git_branch" :v-adjust 0.05))
+          (make-help-button-cons "T" (concat " " (nerd-icons-mdicon "nf-md-file_tree"))
                                  "Thread view")
           mu4e-headers-related-label
-          (make-help-button-cons "R" (concat " " (nerd-icons-mdicon "nf-md-link" :v-adjust -0.1))
+          (make-help-button-cons "R" (concat " " (nerd-icons-mdicon "nf-md-graph"))
                                  "Showing related emails")
           mu4e-headers-full-label
           (make-help-button-cons "F" (concat " " (nerd-icons-mdicon "nf-md-disc"))
-                                 "Search is full!")))
+                                 "Search is unlimited")
+          mu4e-headers-hide-label
+          (make-help-button-cons "H" (concat " " (nerd-icons-mdicon "nf-md-file_hidden"))
+                                 "Messages are hidden according to `mu4e-headers-hide-predicate'")
+          mu4e-headers-skip-duplicates-label
+          (make-help-button-cons "U" (concat " " (nerd-icons-mdicon "nf-md-email_multiple_outline"))
+                                 "Hiding duplicate messages")))
 
   ;; set mail user agent
   (setq mail-user-agent 'mu4e-user-agent
