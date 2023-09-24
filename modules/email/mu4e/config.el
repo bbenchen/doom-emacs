@@ -398,8 +398,9 @@ Ignores all arguments and returns nil."
       nil)))
 
 (use-package! org-msg
-  :after mu4e
   :when (modulep! +org)
+  :defer t
+  :init (after! mu4e (require 'org-msg))
   :config
   (setq org-msg-options "html-postamble:nil H:5 num:nil ^:{} toc:nil author:nil email:nil tex:dvipng"
         org-msg-startup "hidestars indent inlineimages"
@@ -693,12 +694,11 @@ See `+mu4e-msg-gmail-p' and `mu4e-sent-messages-behavior'.")
 ;;; Alerts
 
 (use-package! mu4e-alert
-  :after mu4e
+  :defer t
+  :init (after! mu4e (mu4e-alert-enable-notifications))
   :config
   (setq doom-modeline-mu4e t)
-
   (mu4e-alert-enable-mode-line-display)
-  (mu4e-alert-enable-notifications)
 
   (when (version<= "1.6" mu4e-mu-version)
     (defadvice! +mu4e-alert-filter-repeated-mails-fixed-a (mails)
