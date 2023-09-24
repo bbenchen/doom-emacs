@@ -212,10 +212,11 @@ This module modifies the default keybindings used in
 Consult async commands (e.g. ~consult-ripgrep~) will have a preceding separator
 character (usually ~#~) before the search input. This is known as the =perl=
 splitting style. Input typed after the separator will be fed to the async
-command until you type a second seperator, afterwhich the candidate list will be
-filtered with Emacs instead (and can be filtered using [[doom-package:orderless]], for example).
-The specific seperator character can be changed by editing it, and might be
-different if the initial input already contains =#=.
+command until you type a second separator, after which the candidate list will
+be filtered with Emacs instead (and can be filtered using
+[[doom-package:orderless]], for example). The specific separator character can be
+changed by editing it, and might be different if the initial input already
+contains =#=.
 
 Note that grep-like async commands translate the input (between the first and
 second =#=) to an Orderless-light expression: space separated inputs are all
@@ -223,7 +224,7 @@ matched in any order. If the grep backend does not support PCRE lookahead, it'll
 only accept 3 space separated inputs to prevent long lookup times, and further
 filtering should be done after a second =#=.
 
-For more information [[https://github.com/minad/consult#asynchronous-search][see here]].
+For more information see [[https://github.com/minad/consult#asynchronous-search][Consult#Asynchronous Search]].
 
 ** Marginalia
 | Keybind       | Description                     |
@@ -267,7 +268,7 @@ If you want to further configure this module, here are some good places to
 start:
 
 ** Vertico
- Vertico provides several [[https://github.com/minad/vertico#extensions][extentions]] that can be used to extend it's interface
+ Vertico provides several [[https://github.com/minad/vertico#extensions][extensions]] that can be used to extend it's interface
 
 ** Consult
 Much of the behaviour of Consult commands can be changed with
@@ -289,7 +290,7 @@ editing ~marginalia-annotator-registry~
 ** Embark
 You can change the available commands in Embark for category ~$cat~ by editing
 ~embark-$cat-map~, and even add new categories. Note that you add categories by
-defining them [[https://github.com/minad/marginalia/#adding-custom-annotators-or-classifiers][through marginalia]], and embark picks up on them.
+defining them [[https://github.com/minad/marginalia/#adding-custom-annotators-or-classifiers][through Marginalia]], and Embark picks up on them.
 
 * Troubleshooting
 /There are no known problems with this module./ [[doom-report:][Report one?]]
