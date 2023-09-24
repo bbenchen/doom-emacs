@@ -23,7 +23,7 @@ Supports Git, Svn, Hg, and Bzr.
   Text, without sacrificing on fringe width (which squeeze other indicators,
   like flycheck's, flymake's, or flyspell's). However, this will look bad with
   themes that invert the foreground/background of either git-gutter's or
-  diff-hl's faces (like modus-themes does).
+  diff-hl's faces (like modus-themes do).
 
 ** Packages
 - [[doom-package:git-gutter-fringe]] unless [[doom-module:+diff-hl]]
