@@ -148,7 +148,10 @@ orderless."
   (if doom-projectile-fd-binary
       (setq consult-fd-args
             '(doom-projectile-fd-binary
-              "--full-path --absolute-path --color=never -H -E .git"
+              "--color never"
+              ;; https://github.com/sharkdp/fd/issues/839
+              "--full-path --absolute-path"
+              "--hidden --exclude .git"
               (when IS-WINDOWS "--path-separator=/"))))
 
   (consult-customize
