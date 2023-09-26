@@ -148,7 +148,7 @@ orderless."
   (if doom-projectile-fd-binary
       (setq consult-fd-args
             '(doom-projectile-fd-binary
-              "--full-path --color=never -H -E .git"
+              "--full-path --absolute-path --color=never -H -E .git"
               (when IS-WINDOWS "--path-separator=/"))))
 
   (consult-customize
