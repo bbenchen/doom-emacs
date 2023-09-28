@@ -13,12 +13,18 @@ If nil, it is disabled in all modes")
 (use-package! tree-sitter
   :defer t
   :config
-  (require 'tree-sitter-langs)
   ;; This makes every node a link to a section of code
   (setq tree-sitter-debug-jump-buttons t
         ;; and this highlights the entire sub tree in your code
         tree-sitter-debug-highlight-jump-region t))
 
+(use-package! tree-sitter-langs
+  :after tree-sitter
+  :init
+  (let ((grammer-dir (expand-file-name "tree-sitter" doom-cache-dir)))
+    (setq tree-sitter-langs-grammar-dir grammer-dir)
+    (if (not (file-exists-p grammer-dir))
+        (mkdir grammer-dir))))
 
 (use-package! evil-textobj-tree-sitter
   :when (modulep! :editor evil +everywhere)
