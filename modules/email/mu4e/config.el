@@ -75,6 +75,7 @@ is non-nil."
      (setq mu4e-get-mail-command "offlineimap -o -q")))
 
   (setq mu4e-update-interval nil
+        mu4e-modeline-support nil
         mu4e-sent-messages-behavior 'sent
         mu4e-hide-index-messages t
         ;; configuration for sending mail
