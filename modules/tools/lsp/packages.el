@@ -3,7 +3,7 @@
 
 (if (modulep! +eglot)
     (progn
-      (package! eglot :pin "cd4e45b700b117d360aac24d749c3c4a4be3d2e2")
+      (package! eglot :pin "cd4e45b700b117d360aac24d749c3c4a4be3d2e2" :built-in 'prefer)
       (when (modulep! :completion vertico)
         (package! consult-eglot :pin "049c6319b8a48ff66189d49592c7759f0b356596"))
       (when (and (modulep! :checkers syntax)
