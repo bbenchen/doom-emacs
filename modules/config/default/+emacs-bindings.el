@@ -32,12 +32,14 @@
        :desc "Recompile"                             "C"   #'recompile
        :desc "Jump to definition"                    "d"   #'+lookup/definition
        :desc "Jump to references"                    "D"   #'+lookup/references
-       :desc "Evaluate buffer/region"                "e"   #'+eval/buffer-or-region
-       :desc "Evaluate & replace region"             "E"   #'+eval/region-and-replace
+       (:when (modulep! :tools eval)
+         :desc "Evaluate buffer/region"              "e"   #'+eval/buffer-or-region
+         :desc "Evaluate & replace region"           "E"   #'+eval/region-and-replace)
        :desc "Format buffer/region"                  "f"   #'+format/region-or-buffer
        :desc "Find implementations"                  "i"   #'+lookup/implementations
        :desc "Jump to documentation"                 "k"   #'+lookup/documentation
-       :desc "Send to repl"                          "s"   #'+eval/send-region-to-repl
+       (:when (modulep! :tools eval)
+         :desc "Send to repl"                        "s"   #'+eval/send-region-to-repl)
        :desc "Find type definition"                  "t"   #'+lookup/type-definition
        :desc "Delete trailing whitespace"            "w"   #'delete-trailing-whitespace
        :desc "Delete trailing newlines"              "W"   #'doom/delete-trailing-newlines
@@ -241,8 +243,9 @@
        (:when (modulep! :tools debug)
          :desc "Debugger"                     "d"  #'+debugger/start)
        :desc "New frame"          "f"  #'make-frame
-       :desc "REPL"               "r"  #'+eval/open-repl-other-window
-       :desc "REPL (same window)" "R"  #'+eval/open-repl-same-window
+       (:when (modulep! :tools eval)
+         :desc "REPL"               "r"  #'+eval/open-repl-other-window
+         :desc "REPL (same window)" "R"  #'+eval/open-repl-same-window)
        :desc "Dired"              "-"  #'dired-jump
        (:when (modulep! :ui neotree)
         :desc "Project sidebar"               "p" #'+neotree/open
