@@ -478,8 +478,6 @@
        (:when (modulep! :ui hydra)
         :desc "SMerge"                    "m"   #'+vc/smerge-hydra/body)
        (:when (modulep! :ui vc-gutter)
-        (:when (modulep! :ui hydra)
-         :desc "VCGutter"                "."   #'+vc/gutter-hydra/body)
         :desc "Revert hunk at point"      "r"   #'+vc-gutter/revert-hunk
         :desc "stage hunk at point"       "s"   #'+vc-gutter/stage-hunk
         :desc "Git time machine"          "t"   #'git-timemachine-toggle
@@ -499,8 +497,8 @@
         :desc "Magit fetch"               "F"   #'magit-fetch
         :desc "Magit pull"                "P"   #'magit-pull
         :desc "Magit buffer log"          "L"   #'magit-log-buffer-file
-        :desc "Git stage file"            "S"   #'magit-stage-file
-        :desc "Git unstage file"          "U"   #'magit-unstage-file
+        :desc "Git stage this file"       "S"   #'magit-stage-buffer-file
+        :desc "Git unstage this file"     "U"   #'magit-unstage-file
         (:prefix ("f" . "find")
          :desc "Find file"                 "f"   #'magit-find-file
          :desc "Find gitconfig file"       "g"   #'magit-find-git-config-file
