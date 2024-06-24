@@ -10,7 +10,7 @@
 ;;; Packages
 
 (use-package! centaur-tabs
-  :hook (doom-first-file . centaur-tabs-mode)
+  :defer t
   :init
   (setq centaur-tabs-set-icons t
         centaur-tabs-gray-out-icons 'buffer
@@ -24,6 +24,10 @@
         ;; prevents that.
         centaur-tabs-cycle-scope 'tabs)
 
+  (if (daemonp)
+      (add-hook 'server-after-make-frame-hook #'centaur-tabs-mode)
+    (add-hook 'doom-first-file-hook #'centaur-tabs-mode))
+
   :config
   (add-hook! '(+doom-dashboard-mode-hook +popup-buffer-mode-hook)
     (defun +tabs-disable-centaur-tabs-mode-maybe-h ()
@@ -31,19 +35,11 @@
       (when (centaur-tabs-mode-on-p)
         (centaur-tabs-local-mode))))
 
-  ;; HACK: `centaur-tabs-buffer-update-groups' is both expensive and called too
-  ;;   frequently. There really is no reason to call it more than 10 times per
-  ;;   second, as buffers rarely change groups more frequently than that.
-  (let ((time (float-time)))
-    (defadvice! +tabs--rate-limit-buffer-update-groups-a (fn)
-      :around #'centaur-tabs-buffer-update-groups
-      (let ((now (float-time)))
-        (if-let ((buf (and (< now (+ time +tabs-buffer-update-groups-delay))
-                           (assq (current-buffer) centaur-tabs--buffers))))
-            (car (nth 2 buf))
-          (setq time now)
-          (funcall fn))))))
-
+  (add-hook! 'doom-load-theme-hook
+    (defun +tabs-reload-centaur-tabs-h ()
+      (when (bound-and-true-p centaur-tabs-mode)
+        (centaur-tabs-mode -1)
+        (centaur-tabs-mode +1)))))
 
 ;; TODO tab-bar-mode (emacs 27)
 ;; TODO tab-line-mode (emacs 27)
