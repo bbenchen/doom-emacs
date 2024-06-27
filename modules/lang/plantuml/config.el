@@ -15,7 +15,8 @@
 
 
 (use-package! flycheck-plantuml
-  :when (modulep! :checkers syntax)
+  :when (and (modulep! :checkers syntax)
+             (not (modulep! :checkers syntax +flymake)))
   :after plantuml-mode
   :config
   (flycheck-plantuml-setup)
@@ -23,6 +24,10 @@
     ;; Surprisingly, this works, even though flycheck-plantuml specifies -Djava.awt...
     (setq-default flycheck-plantuml-executable plantuml-executable-path)))
 
+(use-package! flymake-plantuml
+  :when (modulep! :checkers syntax +flymake)
+  :after plantuml-mode
+  :config (flymake-plantuml-setup))
 
 (after! ob-plantuml
   ;; HACK Force ob-plantuml to use `plantuml-mode''s building mechanism, which
