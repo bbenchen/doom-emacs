@@ -656,15 +656,7 @@ relative to `org-directory', unless it is an absolute path."
   (setq org-display-remote-inline-images 'download) ; TRAMP urls
   (org-link-set-parameters "http"  :image-data-fun #'+org-http-image-data-fn)
   (org-link-set-parameters "https" :image-data-fun #'+org-http-image-data-fn)
-  (org-link-set-parameters "img"   :image-data-fun #'+org-inline-image-data-fn)
-
-  ;; Add support for youtube links + previews
-  (require 'org-yt nil t)
-
-  (defadvice! +org-dont-preview-if-disabled-a (&rest _)
-    "Make `org-yt' respect `org-display-remote-inline-images'."
-    :before-while #'org-yt-image-data-fun
-    (not (eq org-display-remote-inline-images 'skip))))
+  (org-link-set-parameters "img"   :image-data-fun #'+org-inline-image-data-fn))
 
 
 (defun +org-init-export-h ()
@@ -1408,10 +1400,6 @@ between the two."
 
   ;; Other org properties are all-caps. Be consistent.
   (setq org-effort-property "EFFORT")
-
-  ;; Prevent modifications made in invisible sections of an org document, as
-  ;; unintended changes can easily go unseen otherwise.
-  (setq org-catch-invisible-edits 'smart)
 
   ;; Global ID state means we can have ID links anywhere. This is required for
   ;; `org-brain', however.
