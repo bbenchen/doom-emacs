@@ -271,8 +271,9 @@
         (:when (file-exists-p "/Applications/Transmit.app")
           :desc "Send to Transmit"            "u" #'+macos/send-to-transmit
           :desc "Send project to Transmit"    "U" #'+macos/send-project-to-transmit)
-        :desc "Send to Launchbar"          "l" #'+macos/send-to-launchbar
-        :desc "Send project to Launchbar"  "L" #'+macos/send-project-to-launchbar
+        (:when (file-exists-p "/Applications/LaunchBar.app")
+          :desc "Send to Launchbar"          "l" #'+macos/send-to-launchbar
+          :desc "Send project to Launchbar"  "L" #'+macos/send-project-to-launchbar)
         (:when (file-exists-p "/Applications/iTerm.app")
           :desc "Open in iTerm"               "i" #'+macos/open-in-iterm
           :desc "Open in new iTerm window"    "I" #'+macos/open-in-iterm-new-window))
