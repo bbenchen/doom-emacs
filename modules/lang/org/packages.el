@@ -31,7 +31,7 @@
                          (format "(defun org-git-version (&rest _) \"%s-??-%s\")\n"
                                  version (cdr (doom-call-process "git" "rev-parse" "--short" "HEAD")))
                          "(provide 'org-version)\n")))))
-  :pin "f398724bd53eb6af3cf4187c864ec6f89a22ef59")
+  :pin "433fbdbc630df69df671ea945122ed9cb440f251")
 (package! org-contrib
   :recipe (:host github
            :repo "emacsmirror/org-contrib")
@@ -46,7 +46,7 @@
 ;; TODO Adjust when this is added to GNU ELPA
 (when (modulep! +contacts)
   (package! org-contacts
-    :pin "d0cb221502c9e104b6e3c358128b28761ffddb55"
+    :pin "daeaaefd7d01c7460bb27bae49cc7d1c391a6dcc"
     :recipe (:host nil
              :type git
              :repo "https://repo.or.cz/org-contacts.git")))
@@ -64,7 +64,7 @@
 (when (modulep! :editor evil +everywhere)
   (package! evil-org
     :recipe (:host github :repo "doomelpa/evil-org-mode")
-    :pin "a9706da260c45b98601bcd72b1d2c0a24a017700"))
+    :pin "78037d423da3eb354208725aaa707b5c8435147f"))
 (when (modulep! :tools pdf)
   (package! org-pdftools :pin "4e420233a153a9c4ab3d1a7e1d7d3211c836f0ac"))
 (when (modulep! :tools magit)
@@ -76,7 +76,7 @@
 (when (modulep! +dragndrop)
   (package! org-download :pin "19e166f0a8c539b4144cfbc614309d47a9b2a9b7"))
 (when (modulep! +gnuplot)
-  (package! gnuplot :pin "7138b139d2dca9683f1a81325c643b2744aa1ea3")
+  (package! gnuplot :pin "4c6b18f71ff7604e2640033207f5a882ddce78af")
   (package! gnuplot-mode :pin "601f6392986f0cba332c87678d31ae0d0a496ce7"))
 (when (modulep! +jupyter)
   (package! jupyter :pin "f97f4b5d8c83e0b901020f835183dde8a2bf649e"))
@@ -110,7 +110,7 @@
     ;; FIXME A :recipe isn't strictly necessary, but without it, our package
     ;;       bumper fails to distinguish between org-roam v1 and v2.
     :recipe (:host github :repo "org-roam/org-roam")
-    :pin "8667e441876cd2583fbf7282a65796ea149f0e5f")))
+    :pin "0b9fcbc97b65b349826e63bad89ca121a08fd2be")))
 
 ;;; Babel
 (package! ob-async :pin "9aac486073f5c356ada20e716571be33a350a982")
