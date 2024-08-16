@@ -7,9 +7,6 @@
   (when (modulep! +childframe)
     (package! flycheck-posframe :pin "19896b922c76a0f460bf3fe8d8ebc2f9ac9028d8")))
 
-;; Flymake
 (when (modulep! +flymake)
   (package! flymake :built-in t)
-  ;; NOTE: remove when straight bumped to support nonGnuELPA
-  (package! popon :recipe (:repo "https://codeberg.org/akib/emacs-popon"))
   (package! flymake-popon :recipe (:repo "https://codeberg.org/akib/emacs-flymake-popon")))
