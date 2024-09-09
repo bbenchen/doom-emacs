@@ -343,7 +343,7 @@
                    (not (modulep! :checkers syntax +flymake)))
         :desc "Flycheck"                   "f" #'flycheck-mode)
        (:when (modulep! :ui indent-guides)
-        :desc "Indent guides"              "i" #'highlight-indent-guides-mode)
+        :desc "Indent guides"              "i" #'indent-bars-mode)
        (:when (modulep! :ui minimap)
         :desc "Minimap mode"               "m" #'minimap-mode)
        (:when (modulep! :lang org +present)

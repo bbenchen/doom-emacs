@@ -31,7 +31,7 @@
                          (format "(defun org-git-version (&rest _) \"%s-??-%s\")\n"
                                  version (cdr (doom-call-process "git" "rev-parse" "--short" "HEAD")))
                          "(provide 'org-version)\n")))))
-  :pin "433fbdbc630df69df671ea945122ed9cb440f251")
+  :pin "6a5d0ed342efeb3a4c402672fbe9bfebd80af8b6")  ; release_9.7.11
 (package! org-contrib
   :recipe (:host github
            :repo "emacsmirror/org-contrib")
@@ -46,7 +46,7 @@
 ;; TODO Adjust when this is added to GNU ELPA
 (when (modulep! +contacts)
   (package! org-contacts
-    :pin "daeaaefd7d01c7460bb27bae49cc7d1c391a6dcc"
+    :pin "f0a430442b2ae60035dcd74fc6a76299875694f3"
     :recipe (:host nil
              :type git
              :repo "https://repo.or.cz/org-contacts.git")))
@@ -83,7 +83,7 @@
 (when (modulep! +journal)
   (package! org-journal :pin "17b34ce8df9649a73b715c13698220bde1628668"))
 (when (modulep! +noter)
-  (package! org-noter :pin "68646b685a0d8c02419234922a9e2d885d6419df"))
+  (package! org-noter :pin "6f292d7f1efb11222c09f3a91c902ea6e4dbfa33"))
 (when (modulep! +pomodoro)
   (package! org-pomodoro :pin "3f5bcfb80d61556d35fc29e5ddb09750df962cc6"))
 (when (modulep! +pretty)
@@ -95,7 +95,7 @@
     :recipe (:host github :repo "anler/centered-window-mode")
     :pin "80965f6c6afe8d918481433984b493de72af5399")
   (package! org-tree-slide :pin "e2599a106a26ce5511095e23df4ea04be6687a8a")
-  (package! org-re-reveal :pin "dbd8ffb3e57719324491ae47b05fa22ff725744e")
+  (package! org-re-reveal :pin "91610ba9b010b05c52ae7ab77a7890851222db06")
   (package! revealjs
     :recipe (:host github :repo "hakimel/reveal.js"
              :files ("css" "dist" "js" "plugin"))
