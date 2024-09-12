@@ -1,6 +1,6 @@
 ;;; doom-ui.el --- defaults for Doom's aesthetics -*- lexical-binding: t; -*-
 ;;; Commentary:
-;;; Code;
+;;; Code:
 
 ;;
 ;;; Variables
@@ -283,6 +283,14 @@ windows, switch to `doom-fallback-buffer'. Otherwise, delegate to original
 ;;   wide, rather than tall.
 (setq split-width-threshold 160
       split-height-threshold nil)
+
+;; Fix incorrect fg/bg in new frames created after the initial frame
+;; (which are reroneously displayed as black).
+(setq frame-inherited-parameters '(background-color
+                                   foreground-color
+                                   cursor-color
+                                   border-color
+                                   mouse-color))
 
 
 ;;
@@ -589,11 +597,7 @@ windows, switch to `doom-fallback-buffer'. Otherwise, delegate to original
           (setq doom-theme theme)
           (put 'doom-theme 'previous-themes (or last-themes 'none))
           ;; DEPRECATED Hook into `enable-theme-functions' when we target 29
-          (doom-run-hooks 'doom-load-theme-hook)
-          (when-let* ((fg (face-foreground 'default nil t))
-                      (bg (face-background 'default nil t)))
-            (setf (alist-get 'foreground-color default-frame-alist) fg
-                  (alist-get 'background-color default-frame-alist) bg)))))))
+          (doom-run-hooks 'doom-load-theme-hook))))))
 
 
 ;;
@@ -657,11 +661,11 @@ triggering hooks during startup."
   (fset 'set-fontset-font #'ignore))
 
 (after! whitespace
-  (defun doom-is-childframes-p ()
+  (defun doom--in-parent-frame-p ()
     "`whitespace-mode' inundates child frames with whitespace markers, so
 disable it to fix all that visual noise."
     (null (frame-parameter nil 'parent-frame)))
-  (add-function :before-while whitespace-enable-predicate #'doom-is-childframes-p))
+  (add-function :before-while whitespace-enable-predicate #'doom--in-parent-frame-p))
 
 (provide 'doom-ui)
 ;;; doom-ui.el ends here
