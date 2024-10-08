@@ -18,6 +18,9 @@
   (set-repl-handler! 'lua-mode #'+lua/open-repl)
   (set-company-backend! 'lua-mode '(company-lua company-yasnippet))
 
+  (when (modulep! +tree-sitter)
+    (add-hook 'lua-mode-local-vars-hook #'tree-sitter! 'append))
+
   (when (modulep! +lsp)
     (add-hook 'lua-mode-local-vars-hook #'lsp! 'append)
 
