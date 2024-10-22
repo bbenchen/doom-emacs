@@ -343,8 +343,7 @@
        :desc "Soft line wrapping"           "w" #'visual-line-mode
        (:when (modulep! :editor word-wrap)
         :desc "Soft line wrapping"          "w" #'+word-wrap-mode)
-       (:when (and (modulep! :checkers syntax)
-                   (not (modulep! :checkers syntax +flymake)))
+       (:when (modulep! :checkers syntax -flymake)
         :desc "Flycheck"                   "f" #'flycheck-mode)
        (:when (modulep! :ui indent-guides)
         :desc "Indent guides"              "i" #'indent-bars-mode)

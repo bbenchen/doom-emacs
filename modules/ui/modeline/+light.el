@@ -405,8 +405,7 @@ Requires `anzu', also `evil-anzu' if using `evil-mode' for compatibility with
   "Displays color-coded error status & icon for the current buffer."
   :local t)
 
-(if (and (modulep! :checkers syntax)
-         (not (modulep! :checkers syntax +flymake)))
+(if (modulep! :checkers syntax -flymake)
     (add-hook! '(flycheck-status-changed-functions
                  flycheck-mode-hook)
       (defun +modeline-checker-update (&optional status)

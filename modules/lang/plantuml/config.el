@@ -24,8 +24,7 @@
 
 
 (use-package! flycheck-plantuml
-  :when (and (modulep! :checkers syntax)
-             (not (modulep! :checkers syntax +flymake)))
+  :when (modulep! :checkers syntax -flymake)
   :after plantuml-mode
   :config
   (flycheck-plantuml-setup)
