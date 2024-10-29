@@ -17,7 +17,7 @@
   (require 'straight)
   (doom-plist-merge
    (plist-get plist :recipe)
-   (if-let (recipe (straight-recipes-retrieve package))
+   (if-let* ((recipe (straight-recipes-retrieve package)))
        (cdr (if (memq (car recipe) '(quote \`))
                 (eval recipe t)
               recipe))
@@ -63,7 +63,7 @@
   (interactive)
   (cl-destructuring-bind (&key package plist beg end)
       (doom--package-at-point)
-    (when-let (str (doom--package-to-bump-string package plist))
+    (when-let* ((str (doom--package-to-bump-string package plist)))
       (goto-char beg)
       (delete-region beg end)
       (insert str))))
@@ -165,7 +165,7 @@ each package."
            (ignore-errors (intern (cadr module)))
            current-prefix-arg)))
   (mapc (lambda! (key)
-          (if-let (packages-file (doom-module-locate-path key doom-module-packages-file))
+          (if-let* ((packages-file (doom-module-locate-path key doom-module-packages-file)))
               (with-current-buffer
                   (or (get-file-buffer packages-file)
                       (find-file-noselect packages-file))
@@ -232,11 +232,11 @@ Must be run from a magit diff buffer."
                         :test #'equal)))
         (save-excursion
           (while (re-search-forward "^-" nil t)
-            (when-let (pkg (read-package))
+            (when-let* ((pkg (read-package)))
               (cl-pushnew pkg before :test #'equal))))
         (save-excursion
           (while (re-search-forward "^+" nil t)
-            (when-let (pkg (read-package))
+            (when-let* ((pkg (read-package)))
               (cl-pushnew pkg after :test #'equal))))
         (unless (= (length before) (length after))
           (user-error "Uneven number of packages being bumped"))
@@ -283,7 +283,7 @@ Must be run from a magit diff buffer."
   (doom-initialize-packages)
   (or (get package 'homepage)
       (put package 'homepage
-           (cond ((when-let (location (locate-library (symbol-name package)))
+           (cond ((when-let* ((location (locate-library (symbol-name package))))
                     (with-temp-buffer
                       (if (string-match-p "\\.gz$" location)
                           (jka-compr-insert-file-contents location)
@@ -292,7 +292,7 @@ Must be run from a magit diff buffer."
                       (let ((case-fold-search t))
                         (when (re-search-forward " \\(?:URL\\|homepage\\|Website\\): \\(http[^\n]+\\)\n" nil t)
                           (match-string-no-properties 1))))))
-                 ((when-let ((recipe (straight-recipes-retrieve package)))
+                 ((when-let* ((recipe (straight-recipes-retrieve package)))
                     (straight--with-plist (straight--convert-recipe recipe)
                         (host repo)
                       (pcase host
@@ -312,7 +312,7 @@ Must be run from a magit diff buffer."
                     ("gnu"
                      (format "https://elpa.gnu.org/packages/%s.html" package))
                     (archive
-                     (if-let (src (cdr (assoc package package-archives)))
+                     (if-let* ((src (cdr (assoc package package-archives))))
                          (format "%s" src)
                        (user-error "%S isn't installed through any known source (%s)"
                                    package archive)))))

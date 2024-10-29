@@ -63,7 +63,7 @@
   ;;   terminals. Requires the `input-decode-map' entry in
   ;;   lisp/doom-keybinds.el.
   (define-key! key-translation-map
-    [?\C-i] (cmd! (if-let (((kkp--terminal-has-active-kkp-p))
+    [?\C-i] (cmd! (if-let* (((kkp--terminal-has-active-kkp-p))
                            (keys (this-single-command-raw-keys))
                            ((> (length keys) 2))
                            ((equal (cl-subseq keys -3) [27 91 49])))

@@ -39,11 +39,11 @@ Note that this will keep all ligatures in `+ligatures-prog-mode-list' active, as
     (let ((results))
       (while plist
         (let ((key (pop plist)))
-            (when-let (char (plist-get +ligatures-extra-symbols key))
+            (when-let* ((char (plist-get +ligatures-extra-symbols key)))
               (push (cons (pop plist) char) results))))
       (dolist (mode (ensure-list modes))
         (setf (alist-get mode +ligatures-extra-alist)
-              (if-let (old-results (alist-get mode +ligatures-extra-alist))
+              (if-let* ((old-results (alist-get mode +ligatures-extra-alist)))
                   (dolist (cell results old-results)
                     (setf (alist-get (car cell) old-results) (cdr cell)))
                 results))))))

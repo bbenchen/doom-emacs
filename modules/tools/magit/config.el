@@ -128,7 +128,7 @@ Only has an effect in GUI Emacs.")
   ;; git executable isn't in the exact same location.
   (add-hook! 'magit-status-mode-hook
     (defun +magit-optimize-process-calls-h ()
-      (when-let (path (executable-find magit-git-executable t))
+      (when-let* ((path (executable-find magit-git-executable t)))
         (setq-local magit-git-executable path))))
 
   (add-hook! 'magit-diff-visit-file-hook
@@ -153,7 +153,7 @@ Only has an effect in GUI Emacs.")
   ;; All forge list modes are derived from `forge-topic-list-mode'
   (map! :map forge-topic-list-mode-map :n "q" #'kill-current-buffer)
   (when (not forge-add-default-bindings)
-    (map! :map magit-mode-map [remap magit-browse-thing] #'forge-browse
+    (map! :map magit-mode-map [remap magit-browse-thing] #'forge-browse-dwim
           :map magit-remote-section-map [remap magit-browse-thing] #'forge-browse-remote
           :map magit-branch-section-map [remap magit-browse-thing] #'forge-browse-branch))
   (set-popup-rule! "^\\*?[0-9]+:\\(?:new-\\|[0-9]+$\\)" :size 0.45 :modeline t :ttl 0 :quit nil)
@@ -236,7 +236,7 @@ Only has an effect in GUI Emacs.")
 
   (after! git-rebase
     (dolist (key '(("M-k" . "gk") ("M-j" . "gj")))
-      (when-let (desc (assoc (car key) evil-collection-magit-rebase-commands-w-descriptions))
+      (when-let* ((desc (assoc (car key) evil-collection-magit-rebase-commands-w-descriptions)))
         (setcar desc (cdr key))))
     (evil-define-key* evil-collection-magit-state git-rebase-mode-map
       "gj" #'git-rebase-move-line-down

@@ -7,7 +7,7 @@
   (interactive)
   (let ((config (json-read-file (graphql-locate-config "."))))
     (let-alist config
-      (if-let ((endpoints .extensions.endpoints)
+      (if-let* ((endpoints .extensions.endpoints)
                (endpoint (cdr (assq (intern (graphql--completing-read-endpoint endpoints)) endpoints))))
           (let-alist endpoint
             (graphql-doc--start .url `(:url ,.url :headers ,.headers)))

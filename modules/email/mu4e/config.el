@@ -44,7 +44,7 @@
                (concat "mbsync --all"
                        ;; XDG support was added to isync 1.5, but this lets
                        ;; users on older benefit from it sooner.
-                       (when-let (file (file-exists-p! "isyncrc" (or (getenv "XDG_CONFIG_HOME") "~/.config")))
+                       (when-let* ((file (file-exists-p! "isyncrc" (or (getenv "XDG_CONFIG_HOME") "~/.config"))))
                          (format " --config %S" file)))
                mu4e-change-filenames-when-moving t))
         ((or (modulep! +offlineimap)
@@ -115,7 +115,7 @@ is non-nil."
               (t #'ido-completing-read))
         mu4e-attachment-dir
         (concat
-         (if-let ((xdg-download-query (and (executable-find "xdg-user-dir")
+         (if-let* ((xdg-download-query (and (executable-find "xdg-user-dir")
                                            (doom-call-process "xdg-user-dir" "DOWNLOAD")))
                   (xdg-download-dir (and (= 0 (car xdg-download-query)) (cdr xdg-download-query))))
              xdg-download-dir
@@ -291,7 +291,7 @@ is non-nil."
     (defun +mu4e-view-select-attachment ()
       "Use completing-read to select a single attachment.
 Acts like a singular `mu4e-view-save-attachments', without the saving."
-      (if-let ((parts (delq nil (mapcar
+      (if-let* ((parts (delq nil (mapcar
                                  (lambda (part)
                                    (when (assoc "attachment" (cdr part))
                                      part))
