@@ -13,7 +13,7 @@
       (if (fboundp '+word-wrap-mode)
           (+word-wrap-mode +1)
         (visual-line-mode +1)))
-    (when-let (win (display-buffer output-buffer))
+    (when-let* ((win (display-buffer output-buffer)))
       (fit-window-to-buffer
        win (/ (frame-height) 2)
        nil (/ (frame-width) 2)))
@@ -92,7 +92,7 @@ of the buffer instead."
                         #'+eval/send-region-to-repl)
                     beg end))
           ((let (lang)
-             (if-let ((runner
+             (if-let* ((runner
                        (or (alist-get runner-major-mode +eval-runners)
                            (and (require 'quickrun nil t)
                                 (equal (setq
@@ -126,7 +126,7 @@ of the buffer instead."
                           (buffer-file-name (buffer-base-buffer))))
                         "emacs")
                  (alist-get 'emacs-lisp-mode +eval-runners)))
-        (if-let ((buffer-handler (plist-get (cdr (alist-get major-mode +eval-repls)) :send-buffer)))
+        (if-let* ((buffer-handler (plist-get (cdr (alist-get major-mode +eval-repls)) :send-buffer)))
             (funcall buffer-handler)
           (+eval/region (point-min) (point-max)))
       (quickrun))))

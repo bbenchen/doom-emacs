@@ -34,7 +34,7 @@
 (quiet!
  (require 'cl nil t)    ; "Package cl is deprecated"
  (unless site-run-file  ; unset in doom.el
-   (when-let ((site-run-file (get 'site-run-file 'initial-value)))
+   (when-let* ((site-run-file (get 'site-run-file 'initial-value)))
      (load site-run-file t inhibit-message))))
 
 (setq-default

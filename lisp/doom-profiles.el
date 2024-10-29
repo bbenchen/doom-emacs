@@ -15,7 +15,7 @@ Profile directories are in the format {data-profiles-dir}/$NAME/@/$VERSION, for
 example: '~/.local/share/doom/_/@/0/'")
 
 (defvar doom-profile-load-path
-  (if-let (path (getenv-internal "DOOMPROFILELOADPATH"))
+  (if-let* ((path (getenv-internal "DOOMPROFILELOADPATH")))
       (mapcar #'expand-file-name (split-string-and-unquote path path-separator))
     (list (file-name-concat doom-user-dir "profiles.el")
           (file-name-concat doom-emacs-dir "profiles.el")
@@ -33,7 +33,7 @@ Can be changed externally by setting $DOOMPROFILELOADPATH to a colon-delimited
 list of paths or profile config files (semi-colon delimited on Windows).")
 
 (defvar doom-profile-load-file
-  (if-let (loader (getenv-internal "DOOMPROFILELOADFILE"))
+  (if-let* ((loader (getenv-internal "DOOMPROFILELOADFILE")))
       (expand-file-name loader doom-emacs-dir)
     (file-name-concat doom-emacs-dir (format "profiles/load.el" emacs-major-version)))
   "Where Doom writes its interactive profile loader script.
@@ -102,7 +102,7 @@ run.")
                                      `(,val)
                                    `(,(abbreviate-file-name path) ,val))))
                        (cons `(user-emacs-directory :path ,@val)
-                             (if-let (profile-file (file-exists-p! doom-profiles-config-file-name path))
+                             (if-let* ((profile-file (file-exists-p! doom-profiles-config-file-name path)))
                                  (car (doom-file-read profile-file :by 'read*))
                                (when (file-exists-p (doom-path path subdir "lisp/doom.el"))
                                  '((doom-user-dir :path ,@val)))))))
@@ -260,9 +260,9 @@ caches them in `doom--profiles'. If RELOAD? is non-nil, refresh the cache."
   "Return PROFILE-NAME's PROFILE, otherwise its PROPERTY, otherwise NULL-VALUE."
   (when (stringp profile-name)
     (setq profile-name (intern profile-name)))
-  (if-let (profile (assq profile-name (doom-profiles)))
+  (if-let* ((profile (assq profile-name (doom-profiles))))
       (if property
-          (if-let (propval (assq property (cdr profile)))
+          (if-let* ((propval (assq property (cdr profile))))
               (cdr propval)
             null-value)
         profile)

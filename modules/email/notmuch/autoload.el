@@ -44,10 +44,10 @@
             ((or `mbsync
                  `mbsync-xdg) ; DEPRECATED `mbsync-xdg' is now just `mbsync'
              (format "mbsync %s -a && notmuch new"
-                     (if-let (config-file
+                     (if-let* ((config-file
                               (doom-glob (or (getenv "XDG_CONFIG_HOME")
                                              "~/.config")
-                                         "isync/mbsyncrc"))
+                                         "isync/mbsyncrc")))
                          (format "-c %S" (car config-file))
                        "")))
             (`offlineimap

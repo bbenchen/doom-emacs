@@ -281,7 +281,7 @@ remains lean."
           (pinned (doom-package-pinned-list)))
       (add-hook 'native-comp-async-cu-done-functions #'doom-packages--native-compile-done-h)
       (straight--make-build-cache-available)
-      (if-let (built
+      (if-let* ((built
                (doom-packages--with-recipes recipes (package local-repo recipe)
                  (let ((repo-dir (straight--repos-dir (or local-repo package)))
                        (build-dir (straight--build-dir package)))
@@ -349,7 +349,7 @@ remains lean."
                              (let ((default-directory repo-dir))
                                (straight--process-run "git" "config" "core.autocrlf" "true")))))
                      (error
-                      (signal 'doom-package-error (list package e)))))))
+                      (signal 'doom-package-error (list package e))))))))
           (progn
             (when (and (featurep 'native-compile)
                        straight--native-comp-available)
@@ -604,10 +604,10 @@ remains lean."
                    e)))))))
 
 (defun doom-packages--purge-eln ()
-  (if-let (dirs
+  (if-let* ((dirs
            (cl-delete (expand-file-name comp-native-version-dir doom-packages--eln-output-path)
                       (directory-files doom-packages--eln-output-path t "^[^.]" t)
-                      :test #'file-equal-p))
+                      :test #'file-equal-p)))
       (progn
         (print! (start "Purging old native bytecode..."))
         (print-group!

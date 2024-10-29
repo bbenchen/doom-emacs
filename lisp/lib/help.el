@@ -157,7 +157,7 @@ selection of all minor-modes, active or not."
          (append (apply #'doom--org-headings files plist)
                  extra-candidates))
         ivy-sort-functions-alist)
-    (if-let (result (completing-read prompt alist nil nil initial-input))
+    (if-let* ((result (completing-read prompt alist nil nil initial-input)))
         (cl-destructuring-bind (file &optional location)
             (cdr (assoc result alist))
           (if action
@@ -364,10 +364,10 @@ without needing to check if they are available."
                (when (memq (car-safe sexp) '(featurep! modulep! require!))
                  (format "%s %s" (nth 1 sexp) (nth 2 sexp)))))))
         ((when buffer-file-name
-           (when-let (mod (doom-module-from-path buffer-file-name))
+           (when-let* ((mod (doom-module-from-path buffer-file-name)))
              (unless (memq (car mod) '(:core :user))
                (format "%s %s" (car mod) (cdr mod))))))
-        ((when-let (mod (cdr (assq major-mode doom--help-major-mode-module-alist)))
+        ((when-let* ((mod (cdr (assq major-mode doom--help-major-mode-module-alist))))
            (format "%s %s"
                    (symbol-name (car mod))
                    (symbol-name (cadr mod)))))))
@@ -558,7 +558,7 @@ If prefix arg is present, refresh the cache."
           (`straight
            (insert "Straight\n")
            (package--print-help-section "Pinned")
-           (insert (if-let (pin (plist-get (cdr (assq package doom-packages)) :pin))
+           (insert (if-let* ((pin (plist-get (cdr (assq package doom-packages)) :pin)))
                        pin
                      "unpinned")
                    "\n")
@@ -643,7 +643,7 @@ If prefix arg is present, refresh the cache."
               (insert ")\n"))))
 
         (package--print-help-section "Configs")
-        (if-let ((configs (doom--help-package-configs package)))
+        (if-let* ((configs (doom--help-package-configs package)))
             (progn
               (insert "This package is configured in the following locations:")
               (dolist (location configs)

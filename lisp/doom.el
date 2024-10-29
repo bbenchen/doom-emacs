@@ -92,7 +92,7 @@
           (concat "Alternatively, either update your $PATH environment variable to include the\n"
                   "path of the desired Emacs executable OR alter the $EMACS environment variable\n"
                   "to specify the exact path or command needed to invoke Emacs."
-                  (when-let ((script (cadr (member "--load" command-line-args)))
+                  (when-let* ((script (cadr (member "--load" command-line-args)))
                              (command (file-name-nondirectory script)))
                     (concat " For example:\n\n"
                             "  $ EMACS=/path/to/valid/emacs " command " ...\n"
@@ -181,9 +181,9 @@
 ;;; Fix $HOME on Windows
 ;; $HOME isn't normally defined on Windows, but many unix tools expect it.
 (when doom--system-windows-p
-  (when-let (realhome
+  (when-let* ((realhome
              (and (null (getenv-internal "HOME"))
-                  (getenv "USERPROFILE")))
+                  (getenv "USERPROFILE"))))
     (setenv "HOME" realhome)
     (setq abbreviated-home-dir nil)))
 
@@ -211,7 +211,7 @@
   "The time it took, in seconds (as a float), for Doom Emacs to start up.")
 
 (defconst doom-profile
-  (if-let (profile (getenv-internal "DOOMPROFILE"))
+  (if-let* ((profile (getenv-internal "DOOMPROFILE")))
       (save-match-data
         (if (string-match "^\\([^@]+\\)@\\(.+\\)$" profile)
             (cons (match-string 1 profile)
@@ -235,7 +235,7 @@
 (define-obsolete-variable-alias 'doom-private-dir 'doom-user-dir "3.0.0")
 (defvar doom-user-dir
   (expand-file-name
-   (if-let (doomdir (getenv-internal "DOOMDIR"))
+   (if-let* ((doomdir (getenv-internal "DOOMDIR")))
        (file-name-as-directory doomdir)
      (or (let ((xdgdir
                 (file-name-concat
@@ -257,7 +257,7 @@ slash.")
 
 ;; DEPRECATED: .local will be removed entirely in 3.0
 (defvar doom-local-dir
-  (if-let (localdir (getenv-internal "DOOMLOCALDIR"))
+  (if-let* ((localdir (getenv-internal "DOOMLOCALDIR")))
       (expand-file-name (file-name-as-directory localdir))
     (expand-file-name ".local/" doom-emacs-dir))
   "Root directory for local storage.

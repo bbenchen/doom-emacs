@@ -192,7 +192,7 @@ Never set this variable directly, use `with-doom-module'.")
 
 Return its PROPERTY, if specified."
   (declare (side-effect-free t))
-  (when-let ((context (get group name)))
+  (when-let* ((context (get group name)))
     (if property
         (aref
          context
@@ -267,7 +267,7 @@ duplicates."
     (while flags
       (let* ((flag (car flags))
              (flagstr (symbol-name flag)))
-        (when-let ((sym (intern-soft
+        (when-let* ((sym (intern-soft
                          (concat (if (eq ?- (aref flagstr 0)) "+" "-")
                                  (substring flagstr 1)))))
           (setq newflags (delq sym newflags)))
@@ -278,7 +278,7 @@ duplicates."
 (defun doom-module-get (key &optional property)
   "Returns the plist for GROUP MODULE. Gets PROPERTY, specifically, if set."
   (declare (side-effect-free t))
-  (when-let ((m (gethash key doom-modules)))
+  (when-let* ((m (gethash key doom-modules)))
     (if property
         (aref
          m (or (plist-get
@@ -347,7 +347,7 @@ properties:
 (defun doom-module-active-p (group module &optional flags)
   "Return t if GROUP MODULE is active, and with FLAGS (if given)."
   (declare (side-effect-free t))
-  (when-let ((val (doom-module-get (cons group module) (if flags :flags))))
+  (when-let* ((val (doom-module-get (cons group module) (if flags :flags))))
     (or (null flags)
         (doom-module--has-flag-p flags val))))
 
@@ -402,7 +402,7 @@ If INITORDER? is non-nil, sort modules by the CAR of that module's :depth."
 GROUP is a keyword. MODULE is a symbol. FILE is an optional string path.
 If the group isn't enabled this returns nil. For finding disabled modules use
 `doom-module-locate-path' instead."
-  (when-let ((path (doom-module-get key :path)))
+  (when-let* ((path (doom-module-get key :path)))
     (if file
         (file-name-concat path file)
       path)))
@@ -415,7 +415,7 @@ NAME is a symbol (e.g. \\='python). FILE is a string that will be appended to
 the resulting path. If said path doesn't exist, this returns nil, otherwise an
 absolute path."
   (let (file-name-handler-alist)
-    (if-let ((path (doom-module-expand-path key file)))
+    (if-let* ((path (doom-module-expand-path key file)))
         (if (or (null file)
                 (file-exists-p path))
             path)
@@ -496,7 +496,7 @@ those directories."
             ((catch 'doom-modules
                (let* ((module (if (listp m) (car m) m))
                       (flags  (if (listp m) (cdr m))))
-                 (when-let (new (assq module obsolete))
+                 (when-let* ((new (assq module obsolete)))
                    (let ((newkeys (cdr new)))
                      (if (null newkeys)
                          (print! (warn "%s module was removed"))
@@ -591,7 +591,7 @@ For more about modules and flags, see `doom!'."
             ',(doom-module-context-flags doom-module-context)
             (backquote ,flags))
         `(let ((file (file!)))
-           (if-let ((module (doom-module-from-path file)))
+           (if-let* ((module (doom-module-from-path file)))
                (doom-module--has-flag-p
                 (doom-module (car module) (cdr module) :flags)
                 (backquote ,flags))

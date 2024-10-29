@@ -5,9 +5,9 @@
   "Opens a Haskell REPL."
   (interactive "P")
   (require 'haskell-interactive-mode)
-  (if-let (window
+  (if-let* ((window
            (display-buffer
-            (haskell-session-interactive-buffer (haskell-session))))
+            (haskell-session-interactive-buffer (haskell-session)))))
       (window-buffer window)
     (error "Failed to display Haskell REPL")))
 
