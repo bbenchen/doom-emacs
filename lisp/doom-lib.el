@@ -40,7 +40,7 @@ TYPE should be a keyword of any of the known doom-*-error errors (e.g. :font,
 
 (defvar doom-log-level
   (if init-file-debug
-      (if-let ((level (getenv-internal "DEBUG"))
+      (if-let* ((level (getenv-internal "DEBUG"))
                (level (string-to-number level))
                ((not (zerop level))))
           level
@@ -225,7 +225,7 @@ unreadable. Returns the names of envvars that were changed."
         (signal 'file-error (list "No envvar file exists" file)))
     (with-temp-buffer
       (insert-file-contents file)
-      (when-let (env (read (current-buffer)))
+      (when-let* ((env (read (current-buffer))))
         (let ((tz (getenv-internal "TZ")))
           (setq-default
            process-environment
@@ -236,7 +236,7 @@ unreadable. Returns the names of envvars that were changed."
            shell-file-name
            (or (getenv "SHELL")
                (default-value 'shell-file-name)))
-          (when-let (newtz (getenv-internal "TZ"))
+          (when-let* ((newtz (getenv-internal "TZ")))
             (unless (equal tz newtz)
               (set-time-zone-rule newtz))))
         env))))
@@ -311,7 +311,7 @@ TRIGGER-HOOK is a list of quoted hooks and/or sharp-quoted functions."
   "Queue FNS to be byte/natively-compiled after a brief delay."
   (with-memoization (get 'doom-compile-function 'timer)
     (run-with-idle-timer
-     1.5 t (fn! (when-let (fn (pop fns))
+     1.5 t (fn! (when-let* ((fn (pop fns)))
                   (doom-log "compile-functions: %s" fn)
                   (or (if (featurep 'native-compile)
                           (or (subr-native-elisp-p (indirect-function fn))
@@ -383,7 +383,7 @@ The def* forms accepted are:
               (`defadvice
                (if (keywordp (cadr rest))
                    (cl-destructuring-bind (target where fn) rest
-                     `(when-let (fn ,fn)
+                     `(when-let* ((fn ,fn))
                         (advice-add ,target ,where fn)
                         (unwind-protect ,body (advice-remove ,target fn))))
                  (let* ((fn (pop rest))
@@ -516,9 +516,9 @@ ARGLIST."
 (defun doom--fn-crawl (data args)
   (cond ((symbolp data)
          (when-let
-             (pos (cond ((eq data '%*) 0)
+             ((pos (cond ((eq data '%*) 0)
                         ((memq data '(% %1)) 1)
-                        ((get 'doom--fn-crawl data))))
+                        ((get 'doom--fn-crawl data)))))
            (when (and (= pos 1)
                       (aref args 1)
                       (not (eq data (aref args 1))))

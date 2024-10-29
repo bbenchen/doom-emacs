@@ -23,7 +23,7 @@
     :override #'beancount--fava-filter
     (save-match-data
       (let ((output (ansi-color-filter-apply output)))
-        (when-let ((url (string-match "\\(?:Starting\\|Running\\) Fava on \\(http://.+:[0-9]+\\)\n" output)))
+        (when-let* ((url (string-match "\\(?:Starting\\|Running\\) Fava on \\(http://.+:[0-9]+\\)\n" output)))
           (browse-url (match-string 1 output))))))
 
   (map! :map beancount-mode-map

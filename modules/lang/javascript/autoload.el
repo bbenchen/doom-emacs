@@ -10,15 +10,15 @@ ignore the cache."
     (or (and (not refresh-p)
              (gethash project-root +javascript-npm-conf))
         (let ((package-file (expand-file-name "package.json" project-root)))
-          (when-let (json (and (file-exists-p package-file)
+          (when-let* ((json (and (file-exists-p package-file)
                                (require 'json)
-                               (json-read-file package-file)))
+                               (json-read-file package-file))))
             (puthash project-root json +javascript-npm-conf))))))
 
 ;;;###autoload
 (defun +javascript-npm-dep-p (packages &optional project-root refresh-p)
-  (when-let (data (and (bound-and-true-p +javascript-npm-mode)
-                       (+javascript-npm-conf project-root refresh-p)))
+  (when-let* ((data (and (bound-and-true-p +javascript-npm-mode)
+                       (+javascript-npm-conf project-root refresh-p))))
     (let ((deps (append (cdr (assq 'dependencies data))
                         (cdr (assq 'devDependencies data)))))
       (cond ((listp packages)
@@ -34,7 +34,7 @@ ignore the cache."
 ;;;###autoload
 (defun +javascript-add-npm-path-h ()
   "Add node_modules/.bin to `exec-path'."
-  (when-let ((search-directory (or (doom-project-root) default-directory))
+  (when-let* ((search-directory (or (doom-project-root) default-directory))
              (node-modules-parent (locate-dominating-file search-directory "node_modules/"))
              (node-modules-dir (expand-file-name "node_modules/.bin/" node-modules-parent)))
     (make-local-variable 'exec-path)

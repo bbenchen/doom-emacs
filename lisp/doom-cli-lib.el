@@ -10,7 +10,7 @@
   :group 'doom)
 
 (defcustom doom-cli-load-path
-  (append (when-let ((doompath (getenv "DOOMPATH")))
+  (append (when-let* ((doompath (getenv "DOOMPATH")))
             (cl-loop for dir in (split-string doompath path-separator)
                      collect (expand-file-name dir)))
           (list (file-name-concat (dir!) "cli")))
@@ -264,7 +264,7 @@ execution. Can be generated from a `doom-cli-context' with
 (defun doom-cli-key (cli)
   "Return CLI's (type . command), used as a table key or unique identifier."
   (let ((command (doom-cli-command cli)))
-    (if-let (type (doom-cli-type cli))
+    (if-let* ((type (doom-cli-type cli)))
         (cons type command)
       command)))
 
@@ -346,7 +346,7 @@ Returned in the order they will execute. Includes pseudo CLIs."
       (push (cons :before path) results))
     (push '(:before) results)
     (dolist (result results (nreverse clis))
-      (when-let ((cli (doom-cli-get result t))
+      (when-let* ((cli (doom-cli-get result t))
                  ((or (not nopartials?)
                       (doom-cli-type cli))))
         (cl-pushnew cli clis
@@ -424,9 +424,9 @@ Return nil if CLI (a `doom-cli') has no explicit documentation."
     ;; Populate options
     (let ((options (doom-cli-context-options context)))
       (dolist (opt optspec)
-        (when-let (option (cl-loop for flag in (doom-cli-option-switches opt)
+        (when-let* ((option (cl-loop for flag in (doom-cli-option-switches opt)
                                    if (cdr (assoc flag options))
-                                   return (cons flag it)))
+                                   return (cons flag it))))
           (unless (member (car option) seen)
             (setf (alist-get (doom-cli-option-symbol opt) alist)
                   (cdr option))
@@ -459,7 +459,7 @@ Return nil if CLI (a `doom-cli') has no explicit documentation."
                                 (buffer-string))))
                       (&rest    . ,rest)
                       (&whole   . ,(doom-cli-context-whole context))))
-        (when-let (var (car (alist-get (car type) argspec)))
+        (when-let* ((var (car (alist-get (car type) argspec))))
           (setf (alist-get var alist) (cdr type)))))
     alist))
 
@@ -640,11 +640,11 @@ Throws `doom-cli-invalid-option-error' for illegal values."
   "A CLI context, containing all state pertinent to the current session."
   (init-time before-init-time) ; When this context was created
   ;; A session-specific ID of the current context (defaults to number
-  (pid (if-let (pid (getenv "__DOOMPID"))
+  (pid (if-let* ((pid (getenv "__DOOMPID")))
            (string-to-number pid)
          (emacs-pid)))
   ;; Number of Emacs processes this context has been processed through
-  (step (if-let (step (getenv "__DOOMSTEP"))
+  (step (if-let* ((step (getenv "__DOOMSTEP")))
             (string-to-number step)
           -1))
   ;; The geometry of the terminal window.
@@ -720,9 +720,9 @@ executable context."
   "Restore the last restarted context from FILE into CONTEXT."
   (when (and (stringp file)
              (file-exists-p file))
-    (when-let (old-context (with-temp-buffer
+    (when-let* ((old-context (with-temp-buffer
                              (insert-file-contents file)
-                             (read (current-buffer))))
+                             (read (current-buffer)))))
       (unless (doom-cli-context-p old-context)
         (error "An invalid context was restored from file: %s" file))
       (unless (equal (doom-cli-context-prefix context)
@@ -869,10 +869,10 @@ state tied to switches (\"--foo\" or \"-x\") or arbitrary symbols (state).
 If KEY is a string, fetch KEY from context's OPTIONS (by switch).
 If KEY is a symbol, fetch KEY from context's STATE.
 Return NULL-VALUE if KEY does not exist."
-  (if-let (value
+  (if-let* ((value
            (if (stringp key)
                (assoc key (doom-cli-context-options context))
-             (assq key (doom-cli-context-state context))))
+             (assq key (doom-cli-context-state context)))))
       (cdr value)
     null-value))
 
@@ -1016,7 +1016,7 @@ considered as well."
                                         doom-print-indent
                                         1)
                                      "..."))))
-           (when-let (backtrace-file (doom-backtrace-write-to-file backtrace error-file))
+           (when-let* ((backtrace-file (doom-backtrace-write-to-file backtrace error-file)))
              (print! (warn "Wrote extended backtrace to %s")
                      (path backtrace-file))))))))
     (exit! 255)))
@@ -1246,7 +1246,7 @@ Emacs' batch library lacks an implementation of the exec system call."
 
       ;; Run a custom action, defined in `doom-cli-exit-commands'.
       ((pred (keywordp))
-       (if-let (fn (alist-get command doom-cli-exit-commands))
+       (if-let* ((fn (alist-get command doom-cli-exit-commands)))
            (funcall fn args context)
          (error "Invalid exit command: %s" command)))
 
@@ -1282,7 +1282,7 @@ Arguments don't have to be switches either."
       (when omit
         (while argv
           (let ((arg (pop argv)))
-            (if-let (n (cdr (assoc arg omit)))
+            (if-let* ((n (cdr (assoc arg omit))))
                 (if (= n -1)
                     (setq argv nil)
                   (dotimes (i n) (pop argv)))
@@ -1892,7 +1892,7 @@ errors to `doom-cli-error-file')."
           (setq doom-print-backend nil))
         (when (doom-cli-context-pipe-p context :in)
           (with-current-buffer (doom-cli-context-stdin context)
-            (while (if-let (in (ignore-errors (read-from-minibuffer "")))
+            (while (if-let* ((in (ignore-errors (read-from-minibuffer ""))))
                        (insert in "\n")
                      (ignore-errors (delete-char -1))))))
         (doom-cli--exit
@@ -1947,9 +1947,9 @@ errors to `doom-cli-error-file')."
              (doom-cli-invalid-prefix-error
               (let ((prefix (cadr e)))
                 (print! (red "Error: `run!' called with invalid prefix %S") prefix)
-                (if-let (suggested (cl-loop for cli being the hash-value of doom-cli--table
+                (if-let* ((suggested (cl-loop for cli being the hash-value of doom-cli--table
                                             unless (doom-cli-type cli)
-                                            return (car (doom-cli-command cli))))
+                                            return (car (doom-cli-command cli)))))
                     (print! "Did you mean %S?" suggested)
                   (print! "There are no commands defined under %S." prefix)))
               4)
@@ -2264,7 +2264,7 @@ The alist's CAR are lists of formatted switches plus their arguments, e.g.
                                else collect (list (format strfmt switch)))
                       (string-join
                        (or (delq
-                            nil (cons (when-let (docs (doom-cli-option-docs option))
+                            nil (cons (when-let* ((docs (doom-cli-option-docs option)))
                                         (concat docs "."))
                                       (cl-loop for (flags . docs) in docs
                                                unless (equal (seq-difference flags switches) flags)
@@ -2323,7 +2323,7 @@ The alist's CAR are lists of formatted switches plus their arguments, e.g.
   (cl-check-type section-name string)
   (let (alist)
     (dolist (cli cli-list (nreverse alist))
-      (when-let (section (cdr (assoc section-name (doom-cli-docs cli))))
+      (when-let* ((section (cdr (assoc section-name (doom-cli-docs cli)))))
         (with-temp-buffer
           (save-excursion (insert section))
           (let ((lead (current-indentation))

@@ -32,7 +32,7 @@
       ;; Use GNU ls as `gls' from `coreutils' if available. Add `(setq
       ;; dired-use-ls-dired nil)' to your config to suppress the Dired warning
       ;; when not using GNU ls.
-      (if-let (gls (executable-find "gls"))
+      (if-let* ((gls (executable-find "gls")))
           (setq insert-directory-program gls)
         ;; BSD ls doesn't support -v or --group-directories-first
         (setq args (list (car args)))))
@@ -101,7 +101,7 @@ Fixes #3939: unsortable dired entries on Windows."
   (when (modulep! :ui modeline)
     (add-hook! 'dired-mode-hook
       (defun +dired-update-mode-line-height-h ()
-        (when-let (height (bound-and-true-p doom-modeline-height))
+        (when-let* ((height (bound-and-true-p doom-modeline-height)))
           (setq dirvish-mode-line-height height
                 dirvish-header-line-height height)))))
 
@@ -221,7 +221,7 @@ Fixes #3939: unsortable dired entries on Windows."
                persp-before-switch-functions
                projectile-before-switch-project-hook)
     (defun +dired--cleanup-dirvish-h (&rest _)
-      (when-let ((dv (cl-loop for w in (window-list)
+      (when-let* ((dv (cl-loop for w in (window-list)
                               if (or (window-parameter w 'window-side)
                                      (window-dedicated-p w))
                               if (with-current-buffer (window-buffer w) (dirvish-curr))
@@ -281,9 +281,9 @@ Fixes #3939: unsortable dired entries on Windows."
   ;; deleted directory. Of course I do!
   (setq dired-clean-confirm-killing-deleted-buffers nil)
   ;; Let OS decide how to open certain files
-  (when-let (cmd (cond ((featurep :system 'macos) "open")
+  (when-let* ((cmd (cond ((featurep :system 'macos) "open")
                        ((featurep :system 'linux) "xdg-open")
-                       ((featurep :system 'windows) "start")))
+                       ((featurep :system 'windows) "start"))))
     (setq dired-guess-shell-alist-user
           `(("\\.\\(?:docx\\|pdf\\|djvu\\|eps\\)\\'" ,cmd)
             ("\\.\\(?:jpe?g\\|png\\|gif\\|xpm\\)\\'" ,cmd)

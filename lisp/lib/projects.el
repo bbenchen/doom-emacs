@@ -79,7 +79,7 @@ file will be created within it so that it will always be treated as one. This
 command will throw an error if a parent of DIR is a valid project (which would
 mask DIR)."
   (interactive "D")
-  (when-let ((proj-dir (doom-project-root dir)))
+  (when-let* ((proj-dir (doom-project-root dir)))
     (if (file-equal-p proj-dir dir)
         (user-error "ERROR: Directory is already a project: %s" proj-dir)
       (user-error "ERROR: Directory is already inside another project: %s" proj-dir)))
@@ -119,8 +119,8 @@ Returns nil if not in a project."
   "Return the name of the current project.
 
 Returns '-' if not in a valid project."
-  (if-let (project-root (or (doom-project-root dir)
-                            (if dir (expand-file-name dir))))
+  (if-let* ((project-root (or (doom-project-root dir)
+                              (if dir (expand-file-name dir)))))
       (funcall projectile-project-name-function project-root)
     "-"))
 

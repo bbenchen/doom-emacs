@@ -128,7 +128,7 @@ the children of class at point."
   (condition-case _
       (progn
         (save-window-excursion (cmake-help))
-        (when-let (buf (get-buffer "*CMake Help*"))
+        (when-let* ((buf (get-buffer "*CMake Help*")))
           (pop-to-buffer buf)
           t))
     (error nil)))
@@ -152,9 +152,9 @@ the children of class at point."
   "Takes the local project include paths and registers them with ffap.
 This way, `find-file-at-point' (and `+lookup/file') will know where to find most
 header files."
-  (when-let (project-root (and (featurep 'lsp)
+  (when-let* ((project-root (and (featurep 'lsp)
                                (or (lsp-workspace-root)
-                                   (doom-project-root))))
+                                   (doom-project-root)))))
     (require 'ffap)
     (make-local-variable 'ffap-c-path)
     (make-local-variable 'ffap-c++-path)

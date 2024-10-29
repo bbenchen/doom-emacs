@@ -136,12 +136,12 @@ Updates the date to today."
   (interactive)
   (save-restriction
     (widen)
-    (when-let (transaction
+    (when-let* ((transaction
                (completing-read
                 "Clone transaction: "
                 (string-lines (buffer-string))
                 (doom-partial #'string-match-p "^[0-9]\\{4\\}-[0-9]\\{2\\}-[0-9]\\{2\\} [*!] ")
-                t))
+                t)))
       (goto-char (point-min))
       (re-search-forward (concat "^" (regexp-quote transaction)))
       (+beancount/clone-this-transaction t))))

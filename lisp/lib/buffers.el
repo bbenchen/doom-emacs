@@ -141,8 +141,8 @@ If BUFFER-OR-NAME is omitted or nil, the current buffer is tested."
   (or (bufferp buffer-or-name)
       (stringp buffer-or-name)
       (signal 'wrong-type-argument (list '(bufferp stringp) buffer-or-name)))
-  (when-let (buf (get-buffer buffer-or-name))
-    (when-let (basebuf (buffer-base-buffer buf))
+  (when-let* ((buf (get-buffer buffer-or-name)))
+    (when-let* ((basebuf (buffer-base-buffer buf)))
       (setq buf basebuf))
     (and (buffer-live-p buf)
          (not (doom-temp-buffer-p buf))
@@ -380,7 +380,7 @@ current project."
 (defun doom/kill-project-buffers (project &optional interactive)
   "Kill buffers for the specified PROJECT."
   (interactive
-   (list (if-let (open-projects (doom-open-projects))
+   (list (if-let* ((open-projects (doom-open-projects)))
              (completing-read
               "Kill buffers for project: " open-projects
               nil t nil nil

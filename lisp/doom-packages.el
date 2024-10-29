@@ -235,9 +235,9 @@ uses a straight or package.el command directly).")
   (dolist (package packages)
     (let* ((name (car package))
            (repo (symbol-name name)))
-      (when-let (recipe (plist-get (cdr package) :recipe))
+      (when-let* ((recipe (plist-get (cdr package) :recipe)))
         (straight-override-recipe (cons name recipe))
-        (when-let (local-repo (plist-get recipe :local-repo))
+        (when-let* ((local-repo (plist-get recipe :local-repo)))
           (setq repo local-repo)))
       (print-group!
        ;; Only clone the package, don't build them. Straight hasn't been fully
@@ -335,7 +335,7 @@ processed."
                              (memq (plist-get recipe :host) '(github gitlab bitbucket)))
                         (plist-put recipe :type 'git)
                       recipe))
-            (repo (if-let (local-repo (plist-get recipe :local-repo))
+            (repo (if-let* ((local-repo (plist-get recipe :local-repo)))
                       (directory-file-name local-repo)
                     (ignore-errors (straight-vc-local-repo-name recipe)))))
       repo
@@ -391,7 +391,7 @@ non-nil."
 
 (defun doom-package-in-module-p (package category &optional module)
   "Return non-nil if PACKAGE was installed by the user's private config."
-  (when-let (modules (doom-package-get package :modules))
+  (when-let* ((modules (doom-package-get package :modules)))
     (or (and (not module) (assq :user modules))
         (member (cons category module) modules))))
 
@@ -455,8 +455,8 @@ also be a list of module keys."
         doom-packages)
     (letf! (defun read-packages (key)
              (with-doom-module key
-               (when-let (file (doom-module-locate-path
-                                key doom-module-packages-file))
+               (when-let* ((file (doom-module-locate-path
+                                  key doom-module-packages-file)))
                  (doom-packages--read file nil 'noerror))))
       (with-doom-context 'packages
         (let ((user? (assq :user module-list)))
@@ -572,7 +572,7 @@ elsewhere."
               do (cl-callf plist-put plist key value))
      ;; Some basic key validation; throws an error on invalid properties
      (condition-case e
-         (when-let (recipe (plist-get plist :recipe))
+         (when-let* ((recipe (plist-get plist :recipe)))
            (cl-destructuring-bind
                (&key local-repo _files _flavor _build _pre-build _post-build
                      _includes _type _repo _host _branch _protocol _remote

@@ -168,7 +168,7 @@ Respects `diff-hl-disable-on-remote'."
   ;;   and #7954).
   ;; REVIEW: Report this upstream.
   (defun +vc-gutter--kill-thread (&optional block?)
-    (when-let ((th +vc-gutter--diff-hl-thread))
+    (when-let* ((th +vc-gutter--diff-hl-thread))
       (when (thread-live-p th)
         (thread-signal th 'quit nil)
         (when block?
@@ -210,6 +210,6 @@ Respects `diff-hl-disable-on-remote'."
   ;;   triggered from Elisp's buffer API (from what I can tell).
   (defadvice! +vc-gutter--kill-diff-hl-thread-a (&optional buf)
     :before #'kill-buffer
-    (when-let ((buf (ignore-errors (window-normalize-buffer buf))))
+    (when-let* ((buf (ignore-errors (window-normalize-buffer buf))))
       (with-current-buffer buf
         (+vc-gutter--kill-thread t)))))

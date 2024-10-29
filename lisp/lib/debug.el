@@ -32,7 +32,7 @@ symbol and CDR is the value to set it to when `doom-debug-mode' is activated.")
 (defvar doom-debug--unbound-vars nil)
 
 (defun doom-debug--watch-vars-h (&rest _)
-  (when-let (vars (copy-sequence doom-debug--unbound-vars))
+  (when-let* ((vars (copy-sequence doom-debug--unbound-vars)))
     (setq doom-debug--unbound-vars nil)
     (mapc #'doom-debug--set-var vars)))
 
