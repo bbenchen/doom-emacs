@@ -29,7 +29,7 @@
       (package! osx-dictionary :pin "6abfd6908b0dc773020466225c908000870b383b")
     (package! define-word :pin "31a8c67405afa99d0e25e7c86a4ee7ef84a808fe")
     (when (modulep! +offline)
-      (package! wordnut :pin "feac531404041855312c1a046bde7ea18c674915")
+      (package! wordnut :pin "dffc75a455d0d4458b7555f4c051c51d71c8e18a")
       (package! synosaurus :pin "14d34fc92a77c3a916b4d58400424c44ae99cd81")))
 
   (unless (modulep! +offline)
