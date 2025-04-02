@@ -178,7 +178,7 @@ stored in `persp-save-dir'.")
 
   ;; per-project workspaces, but reuse current workspace if empty
   ;; HACK?? needs review
-  (setq projectile-switch-project-action (lambda () (+workspaces-set-project-action-fn) (+workspaces-switch-to-project-h)))
+  (setq projectile-switch-project-action #'+workspaces-switch-to-project-h)
 
   (when (modulep! :completion ivy)
     (after! counsel-projectile
