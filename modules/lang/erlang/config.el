@@ -13,8 +13,7 @@
 
 (use-package! erlang-ts
   :when (modulep! +tree-sitter)
-  :when (fboundp 'erlang-ts-mode)
   :defer t
   :init
   (set-tree-sitter! 'erlang-mode 'erlang-ts-mode
-    '((erlang "https://github.com/WhatsApp/tree-sitter-erlang"))))
+    '((erlang :url "https://github.com/WhatsApp/tree-sitter-erlang"))))
