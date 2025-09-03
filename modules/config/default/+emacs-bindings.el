@@ -398,8 +398,8 @@
         :desc "Magit fetch"                "F"   #'magit-fetch
         :desc "Magit pull"                 "P"   #'magit-pull
         :desc "Magit buffer log"           "L"   #'magit-log-buffer-file
-        :desc "Git stage file"             "S"   #'magit-stage-file
-        :desc "Git unstage file"           "U"   #'magit-unstage-file
+        :desc "Git stage file"             "S"   #'magit-file-stage
+        :desc "Git unstage file"           "U"   #'magit-file-unstage
         (:prefix ("f" . "find")
          :desc "Find file"                 "f"   #'magit-find-file
          :desc "Find gitconfig file"       "g"   #'magit-find-git-config-file
