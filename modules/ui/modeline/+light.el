@@ -224,7 +224,6 @@ LHS and RHS will accept."
 
 ;;; `+modeline-matches'
 (use-package! anzu
-  :after-call isearch-mode
   :config
   ;; We manage our own modeline segments
   (setq anzu-cons-mode-line-p nil)
