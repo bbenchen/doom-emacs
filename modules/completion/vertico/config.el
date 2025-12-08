@@ -340,7 +340,7 @@ orderless."
             '(projectile-switch-project . project-file))
 
   ;; Add Marginalia annotations for `doom/help-packages'
-  (add-to-list 'marginalia-annotator-registry '(doom-package +marginalia--annotate-doom-package-fn none))
+  (add-to-list 'marginalia-annotators '(doom-package +marginalia--annotate-doom-package-fn none))
   (defun +marginalia--annotate-doom-package-fn (cand)
     "Annotate Doom package CAND with source, pin status, and summary."
     (when-let ((package (intern-soft cand)))
