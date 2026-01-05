@@ -15,7 +15,7 @@
         ;; Ask whether destination dirs should get created when copying/removing files.
         dired-create-destination-dirs 'ask
         ;; Where to store image caches
-        image-dired-dir (concat doom-cache-dir "image-dired/")
+        image-dired-dir (file-name-concat doom-profile-cache-dir "image-dired/")
         image-dired-db-file (concat image-dired-dir "db.el")
         image-dired-gallery-dir (concat image-dired-dir "gallery/")
         image-dired-temp-image-file (concat image-dired-dir "temp-image")
@@ -70,10 +70,14 @@ Fixes #3939: unsortable dired entries on Windows."
 
 
 (use-package! dirvish
+  :commands dirvish-dired-noselect-a
   :init
   (setq dirvish-cache-dir (file-name-concat doom-cache-dir "dirvish/"))
-  (dirvish-override-dired-mode)
+  ;; HACK: ...
+  (advice-add #'dired--find-file :override #'dirvish--find-entry)
+  (advice-add #'dired-noselect :around #'dirvish-dired-noselect-a)
   :config
+  (dirvish-override-dired-mode)
   (set-popup-rule! "^ ?\\*\\(?:[Dd]irvish\\|SIDE :: \\).*" :ignore t)
 
   ;; Fixes #8038. This setting is for folks who expect to be able to switch back
