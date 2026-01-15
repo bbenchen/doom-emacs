@@ -458,12 +458,14 @@
        :desc "Recompile"                             "C"   #'recompile
        :desc "Jump to definition"                    "d"   #'+lookup/definition
        :desc "Jump to references"                    "D"   #'+lookup/references
-       :desc "Evaluate buffer/region"                "e"   #'+eval/buffer-or-region
-       :desc "Evaluate & replace region"             "E"   #'+eval:replace-region
+       (:when (modulep! :tools eval)
+         :desc "Evaluate buffer/region"              "e"   #'+eval/buffer-or-region
+         :desc "Evaluate & replace region"           "E"   #'+eval:replace-region)
        :desc "Format buffer/region"                  "f"   #'+format/region-or-buffer
        :desc "Find implementations"                  "i"   #'+lookup/implementations
        :desc "Jump to documentation"                 "k"   #'+lookup/documentation
-       :desc "Send to repl"                          "s"   #'+eval/send-region-to-repl
+       (:when (modulep! :tools eval)
+         :desc "Send to repl"                        "s"   #'+eval/send-region-to-repl)
        :desc "Find type definition"                  "t"   #'+lookup/type-definition
        :desc "Delete trailing whitespace"            "w"   #'delete-trailing-whitespace
        :desc "Delete trailing newlines"              "W"   #'doom/delete-trailing-newlines
@@ -535,7 +537,8 @@
        (:when (modulep! :tools magit)
         :desc "Magit dispatch"            "/"   #'magit-dispatch
         :desc "Magit file dispatch"       "."   #'magit-file-dispatch
-        :desc "Forge dispatch"            "'"   #'forge-dispatch
+        (:when (modulep! :tools magit +forge)
+          :desc "Forge dispatch"             "'"   #'forge-dispatch)
         :desc "Magit switch branch"       "b"   #'magit-branch-checkout
         :desc "Magit status"              "g"   #'magit-status
         :desc "Magit status here"         "G"   #'magit-status-here
@@ -543,6 +546,7 @@
         :desc "Magit blame"               "B"   #'magit-blame-addition
         :desc "Magit clone"               "C"   #'magit-clone
         :desc "Magit fetch"               "F"   #'magit-fetch
+        :desc "Magit pull"                "P"   #'magit-pull
         :desc "Magit buffer log"          "L"   #'magit-log-buffer-file
         :desc "Git stage this file"       "S"   #'magit-file-stage
         :desc "Git unstage this file"     "U"   #'magit-file-unstage
@@ -550,33 +554,37 @@
          :desc "Find file"                 "f"   #'magit-find-file
          :desc "Find gitconfig file"       "g"   #'magit-find-git-config-file
          :desc "Find commit"               "c"   #'magit-show-commit
-         :desc "Find issue"                "i"   #'forge-visit-issue
-         :desc "Find pull request"         "p"   #'forge-visit-pullreq)
+         (:when (modulep! :tools magit +forge)
+           :desc "Find issue"                "i"   #'forge-visit-issue
+           :desc "Find pull request"         "p"   #'forge-visit-pullreq))
         (:prefix ("o" . "open in browser")
          :desc "Browse file or region"     "o"   #'+vc/browse-at-remote
          :desc "Browse homepage"           "h"   #'+vc/browse-at-remote-homepage
-         :desc "Browse remote"             "r"   #'forge-browse-remote
-         :desc "Browse commit"             "c"   #'forge-browse-commit
-         :desc "Browse an issue"           "i"   #'forge-browse-issue
-         :desc "Browse a pull request"     "p"   #'forge-browse-pullreq
-         :desc "Browse issues"             "I"   #'forge-browse-issues
-         :desc "Browse pull requests"      "P"   #'forge-browse-pullreqs)
+         (:when (modulep! :tools magit +forge)
+           :desc "Browse remote"             "r"   #'forge-browse-remote
+           :desc "Browse commit"             "c"   #'forge-browse-commit
+           :desc "Browse an issue"           "i"   #'forge-browse-issue
+           :desc "Browse a pull request"     "p"   #'forge-browse-pullreq
+           :desc "Browse issues"             "I"   #'forge-browse-issues
+           :desc "Browse pull requests"      "P"   #'forge-browse-pullreqs))
         (:prefix ("l" . "list")
          (:when (modulep! :tools gist)
           :desc "List gists"              "g"   #'+gist:list)
          :desc "List repositories"         "r"   #'magit-list-repositories
          :desc "List submodules"           "s"   #'magit-list-submodules
          :desc "List issues"               "i"   #'forge-list-issues
-         :desc "List pull requests"        "p"   #'forge-list-pullreqs
-         :desc "List notifications"        "n"   #'forge-list-notifications)
+         (:when (modulep! :tools magit +forge)
+           :desc "List pull requests"        "p"   #'forge-list-pullreqs
+           :desc "List notifications"        "n"   #'forge-list-notifications))
         (:prefix ("c" . "create")
          :desc "Initialize repo"           "r"   #'magit-init
          :desc "Clone repo"                "R"   #'magit-clone
          :desc "Commit"                    "c"   #'magit-commit-create
          :desc "Fixup"                     "f"   #'magit-commit-fixup
          :desc "Branch"                    "b"   #'magit-branch-and-checkout
-         :desc "Issue"                     "i"   #'forge-create-issue
-         :desc "Pull request"              "p"   #'forge-create-pullreq)))
+         (:when (modulep! :tools magit +forge)
+           :desc "Issue"                     "i"   #'forge-create-issue
+           :desc "Pull request"              "p"   #'forge-create-pullreq))))
 
       ;;; <leader> i --- insert
       (:prefix-map ("i" . "insert")
@@ -691,8 +699,9 @@
        :desc "Start a debugger"   "d"  #'+debugger/start
        :desc "New frame"          "f"  #'make-frame
        :desc "Select frame"       "F"  #'select-frame-by-name
-       :desc "REPL"               "r"  #'+eval/open-repl-other-window
-       :desc "REPL (same window)" "R"  #'+eval/open-repl-same-window
+       (:when (modulep! :tools eval)
+         :desc "REPL"               "r"  #'+eval/open-repl-other-window
+         :desc "REPL (same window)" "R"  #'+eval/open-repl-same-window)
        :desc "Dired"              "-"  #'dired-jump
        (:when (modulep! :ui neotree)
         :desc "Project sidebar"              "p" #'+neotree/open
