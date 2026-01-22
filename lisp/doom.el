@@ -628,6 +628,8 @@ Otherwise, `en/disable-command' (in novice.el.gz) is hardcoded to write them to
          (zerop native-comp-async-jobs-number)
          (setq comp-num-cpus
                (max 1 (/ (num-processors) (if noninteractive 1 4))))))
+  ;; This is renamed in newer versions of Emacs.
+  (advice-add #'comp--effective-async-max-jobs :before #'comp-effective-async-max-jobs@set-default-cpus)
 
   (define-advice comp-run-async-workers (:around (fn &rest args) dont-litter-tmpdir)
     "Normally, native-comp writes a ton to /tmp. This advice redirects this IO
