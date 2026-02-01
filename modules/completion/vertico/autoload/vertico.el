@@ -48,7 +48,7 @@
                                      (concat "\\" (char-to-string separator))
                                      query t t))
           (`perl
-           (when (string-match-p initial query)
+           (when (string-match-p (if (characterp initial) (char-to-string initial) initial) query)
              (setf (alist-get 'perlalt consult-async-split-styles-alist)
                    `(:initial ,(or (cl-loop for char in (list "%" "@" "!" "&" "/" ";")
                                             unless (string-match-p char query)
