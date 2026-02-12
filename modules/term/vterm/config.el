@@ -1,7 +1,7 @@
 ;;; term/vterm/config.el -*- lexical-binding: t; -*-
 
 (use-package! vterm
-  :when (featurep 'dynamic-modules)
+  :when (bound-and-true-p module-file-suffix)  ; requires dynamic-modules support
   :commands vterm-mode
   :preface
   ;; HACK Because vterm clusmily forces vterm-module.so's compilation on us when
