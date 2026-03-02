@@ -1,7 +1,9 @@
 ;; -*- no-byte-compile: t; -*-
 ;;; tools/llm/packages.el
 
-(package! gptel :pin "11ddace991f63e98212be400570d85d716d2db83")
+(package! gptel
+  :recipe (:nonrecursive t)
+  :pin "d221329ee3aa0198ad51c003a8d94b2af3a72dce")
 
 (package! gptel-quick
   :recipe (:host github :repo "karthink/gptel-quick")
@@ -13,3 +15,8 @@
     :recipe (:host github
              :repo "ArthurHeymans/gptel-magit")
     :pin "4a40c3fc201d60d2f0589c2e1a6693fd94bb4c98"))
+
+(when (modulep! :lang org)
+  (package! ob-gptel
+    :recipe (:host github :repo "jwiegley/ob-gptel")
+    :pin "60e704a390d767a7d06c8d3845ba8786b75f7da3"))

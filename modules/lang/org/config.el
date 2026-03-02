@@ -489,19 +489,19 @@ relative to `org-directory', unless it is an absolute path."
                     '(warning org-link))))
 
   ;; Additional custom links for convenience
-  (pushnew! org-link-abbrev-alist
-            '("github"      . "https://github.com/%s")
-            '("youtube"     . "https://youtube.com/watch?v=%s")
-            '("google"      . "https://google.com/search?q=")
-            '("gimages"     . "https://google.com/images?q=%s")
-            '("gmap"        . "https://maps.google.com/maps?q=%s")
-            '("kagi"        . "https://kagi.com/search?q=%s")
-            '("duckduckgo"  . "https://duckduckgo.com/?q=%s")
-            '("wikipedia"   . "https://en.wikipedia.org/wiki/%s")
-            '("wolfram"     . "https://wolframalpha.com/input/?i=%s")
-            '("doom-repo"   . "https://github.com/doomemacs/doomemacs/%s")
-            `("emacsdir"    . ,(doom-path doom-emacs-dir "%s"))
-            `("doomdir"     . ,(doom-path doom-user-dir "%s")))
+  (dolist (abbrev `(("github"      . "https://github.com/%s")
+                    ("youtube"     . "https://youtube.com/watch?v=%s")
+                    ("google"      . "https://google.com/search?q=")
+                    ("gimages"     . "https://google.com/images?q=%s")
+                    ("gmap"        . "https://maps.google.com/maps?q=%s")
+                    ("kagi"        . "https://kagi.com/search?q=%s")
+                    ("duckduckgo"  . "https://duckduckgo.com/?q=%s")
+                    ("wikipedia"   . "https://en.wikipedia.org/wiki/%s")
+                    ("wolfram"     . "https://wolframalpha.com/input/?i=%s")
+                    ("doom-repo"   . "https://github.com/doomemacs/doomemacs/%s")
+                    ("emacsdir"    . ,(doom-path doom-emacs-dir "%s"))
+                    ("doomdir"     . ,(doom-path doom-user-dir "%s"))))
+    (add-to-list 'org-link-abbrev-alist abbrev))
 
   (+org-define-basic-link "org" 'org-directory)
   (+org-define-basic-link "doom" 'doom-emacs-dir)
@@ -1084,8 +1084,9 @@ between the two."
     ;;      link is stored or exported (whether or not they're a pdf link). This
     ;;      error gimps org until `pdf-tools-install' is run, but this is poor
     ;;      UX, so we suppress it.
-    (defun +org--pdftools-link-handler (fn &rest args)
-      "Produces a link handler for org-pdftools that suppresses missing-epdfinfo errors whenever storing or exporting links."
+    (defun +org--pdftools-link-handler (fn &rest _args)
+      "Produces a link handler for org-pdftools that suppresses missing-epdfinfo
+errors whenever storing or exporting links."
       (lambda (&rest args)
         (and (ignore-errors (require 'org-pdftools nil t))
              (file-executable-p pdf-info-epdfinfo-program)

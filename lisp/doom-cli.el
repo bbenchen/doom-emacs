@@ -1186,7 +1186,7 @@ Emacs' batch library lacks an implementation of the exec system call."
                 ,(cl-loop for (var . val) in persisted-env
                           if (<= (length val) 2048)  ; Prevent "Argument list too long" errors
                           concat (format "%s=%s \\\n" var (shell-quote-argument val))
-                          else do (doom-log 1 "restart: wiscarding envvar %S for being too long (%d)" var (length val)))
+                          else do (doom-log 1 "restart: discarding envvar %S for being too long (%d)" var (length val)))
                 ,(format "PATH=\"%s%s$PATH\" \\\n"
                          (doom-path doom-emacs-dir "bin")
                          path-separator)
@@ -1432,7 +1432,13 @@ ARGS are options passed to less. If DOOMPAGER is set, ARGS are ignored."
   (or (when-let* ((path (doom-cli-autoload cli))
                   (path (locate-file-internal path doom-cli-load-path load-suffixes)))
         (doom-log "load: autoload %s" path)
-        (let ((doom-cli--group-plist (doom-cli-plist cli)))
+        (let ((doom-cli--group-plist
+               ;; FIX(#8560): Don't inherit :hide from the autoload stub's
+               ;;   plist, because alias stubs have :hide t, and that would
+               ;;   propagate to the primary command when the file is loaded.
+               (let ((p (copy-sequence (doom-cli-plist cli))))
+                 (cl-remf p :hide)
+                 p)))
           (doom-load path))
         (let* ((key (doom-cli-key cli))
                (cli (gethash key doom-cli--table)))

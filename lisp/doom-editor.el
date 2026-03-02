@@ -118,7 +118,8 @@ possible."
       auto-save-file-name-transforms
       `(("\\`/[^/]*:\\([^/]*/\\)*\\([^/]*\\)\\'"
          ,(file-name-concat auto-save-list-file-prefix "tramp-\\2-") sha1)
-        ("\\`/\\([^/]+/\\)*\\([^/]+\\)\\'" ,(file-name-concat auto-save-list-file-prefix "\\2-") sha1)))
+        ("\\`/\\([^/]+/\\)*\\([^/]+\\)\\'"
+         ,(file-name-concat auto-save-list-file-prefix "\\2-") sha1)))
 
 (add-hook! 'auto-save-hook
   (defun doom-ensure-auto-save-prefix-exists-h ()
@@ -560,7 +561,7 @@ on."
     :before-while #'so-long-statistics-excessive-p
     :before-while #'so-long-detected-long-line-p
     (not (or (doom-temp-buffer-p (current-buffer))
-             (doom-special-buffer-p (current-buffer)))))
+             (doom-special-buffer-p (current-buffer) t))))
 
   ;; Don't disable syntax highlighting and line numbers, or make the buffer
   ;; read-only, in `so-long-minor-mode', so we can have a basic editing

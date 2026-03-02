@@ -75,7 +75,7 @@ TYPE should be a keyword of any of the known doom-*-error errors (e.g. :font,
 ;; This is a macro instead of a function to prevent the potentially expensive
 ;; evaluation of its arguments when debug mode is off. Return non-nil.
 (defmacro doom-log (message &rest args)
-  "Log a message to stderr or *Messages* (without displaying in the echo area)."
+  "Log MESSAGE formatted with ARGS to stderr or *Messages* (but not echo area)."
   (declare (debug t))
   (let ((level (if (integerp message)
                    (prog1 message
@@ -184,7 +184,7 @@ at the values with which this function was called."
 
 If NOERROR, don't throw an error if PATH doesn't exist.
 Return non-nil if loading the file succeeds."
-  (doom-log "load: %s %s" (abbreviate-file-name path) noerror)
+  (doom-log 2 "load: %s %s" (abbreviate-file-name path) noerror)
   (condition-case-unless-debug e
       (load path noerror 'nomessage)
     (doom-error
@@ -217,6 +217,7 @@ Can also load Doom's subfeatures, e.g. (doom-require 'doom-lib 'files)"
            (symbol-name feature))
          noerror))))
 
+;;; DEPRECATED: Remove in v3 (where the envvar file will be an elisp file)
 (defun doom-load-envvars-file (file &optional noerror)
   "Read and set envvars from FILE.
 If NOERROR is non-nil, don't throw an error if the file doesn't exist or is
@@ -246,7 +247,7 @@ unreadable. Returns the names of envvars that were changed."
 (defun doom-run-hook (hook)
   "Run HOOK (a hook function) with better error handling.
 Meant to be used with `run-hook-wrapped'."
-  (doom-log 2 "hook:%s: run %s" (or doom--hook '*) hook)
+  (doom-log 3 "hook:%s: run %s" (or doom--hook '*) hook)
   (condition-case-unless-debug e
       (funcall hook)
     (error
@@ -255,8 +256,7 @@ Meant to be used with `run-hook-wrapped'."
   nil)
 
 (defun doom-run-hooks (&rest hooks)
-  "Run HOOKS (a list of hook variable symbols) with better error handling.
-Is used as advice to replace `run-hooks'."
+  "Run HOOKS (a list of hook variable symbols) with better error handling."
   (dolist (hook hooks)
     (condition-case-unless-debug e
         (let ((doom--hook hook))
@@ -308,6 +308,7 @@ TRIGGER-HOOK is a list of quoted hooks and/or sharp-quoted functions."
         (add-hook hook fn -101))
       fn)))
 
+;;; DEPRECATED: Remove in v3
 (defun doom-compile-functions (&rest fns)
   "Queue FNS to be byte/natively-compiled after a brief delay."
   (with-memoization (get 'doom-compile-function 'timer)
@@ -834,16 +835,8 @@ issues"
   (declare (obsolete "Use `cl-callf2' instead" "3.0.0"))
   `(setq ,sym (append ,sym ,@lists)))
 
-(defmacro setq! (&rest settings)
-  "A more sensible `setopt' for setting customizable variables.
-
-This can be used as a drop-in replacement for `setq' and *should* be used
-instead of `setopt'. Unlike `setq', this triggers custom setters on variables.
-Unlike `setopt', this won't needlessly pull in dependencies."
-  (macroexp-progn
-   (cl-loop for (var val) on settings by 'cddr
-            collect `(funcall (or (get ',var 'custom-set) #'set-default-toplevel-value)
-                              ',var ,val))))
+;; DEPRECATED: Remove in v3
+(define-obsolete-function-alias 'setq! 'setopt "3.0.0")
 
 ;; DEPRECATED: Remove in v3.0
 (defmacro delq! (elt list &optional fetcher)
@@ -856,9 +849,11 @@ If FETCHER is a function, ELT is used as the key in LIST (an alist)."
                         elt)
                      ,list)))
 
+;; DEPRECATED: Remove in v3
 (defmacro pushnew! (place &rest values)
   "Push VALUES sequentially into PLACE, if they aren't already present.
 This is a variadic `cl-pushnew'."
+  (declare (obsolete "Use a loop with `add-to-list' or `cl-pushnew' instead" "3.0.0"))
   (let ((var (make-symbol "result")))
     `(dolist (,var (list ,@values) (with-no-warnings ,place))
        (cl-pushnew ,var ,place :test #'equal))))
@@ -1285,7 +1280,7 @@ Never set this variable directly, use `with-doom-module'.")
             (if key
                 (doom-module-context key)
               (make-doom-module-context)))))
-     (doom-log 2 ":context:module: =%s" doom-module-context)
+     (doom-log 3 ":context:module: =%s" doom-module-context)
      ,@body))
 
 (defun doom-module-context (key)
