@@ -81,7 +81,7 @@ In tty Emacs, messages are suppressed completely."
   (display-line-numbers-mode -1))
 
 ;;;###autoload
-(defun doom-kill-childframes-h ()
+(defun doom-kill-childframes-h (&rest _)
   "Delete all childframes (and `posframe' frames)."
   (dolist (frame (frame-list))
     (when (or (frame-parameter frame 'posframe-buffer)

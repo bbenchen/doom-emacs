@@ -9,4 +9,4 @@
   :pin "e9ead409b17d8cf7c221f6c28e115a8c051be9e3"
   :built-in 'prefer)
 
-(package! use-package :pin "039b721a4d24b93adc3170e39a6cba7a8200ed43" :built-in 'prefer)
+(package! use-package :pin "4090d3267fd34705764576b5e5f7b513c863c368" :built-in 'prefer)
