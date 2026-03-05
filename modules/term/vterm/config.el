@@ -29,4 +29,7 @@
     ;; Don't prompt about dying processes when killing vterm
     confirm-kill-processes nil
     ;; Prevent premature horizontal scrolling
-    hscroll-margin 0))
+    hscroll-margin 0)
+
+  (add-hook! 'vterm-mode-hook :append #'doom-mark-buffer-as-real-h)
+  (add-hook! 'vterm-mode-hook :append #'hide-mode-line-mode))
