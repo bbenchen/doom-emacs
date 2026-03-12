@@ -93,8 +93,8 @@
           (concat "Alternatively, either update your $PATH environment variable to include the\n"
                   "path of the desired Emacs executable OR alter the $EMACS environment variable\n"
                   "to specify the exact path or command needed to invoke Emacs."
-                  (when-let ((script (cadr (member "--load" command-line-args)))
-                             (command (file-name-nondirectory script)))
+                  (when-let* ((script (cadr (member "--load" command-line-args)))
+                              (command (file-name-nondirectory script)))
                     (concat " For example:\n\n"
                             "  $ EMACS=/path/to/valid/emacs " command " ...\n"
                             "  $ EMACS=\"/Applications/Emacs.app/Contents/MacOS/Emacs\" " command " ...\n"
@@ -807,9 +807,12 @@ appropriately against `noninteractive' or the `cli' context."
         (when (doom-context-push 'emacs)
           (add-hook 'doom-after-init-hook #'doom-load-packages-incrementally-h 100)
           (add-hook 'doom-after-init-hook #'doom-display-benchmark-h 110)
-          (doom-run-hook-on 'doom-first-buffer-hook '(find-file-hook doom-switch-buffer-hook))
           (doom-run-hook-on 'doom-first-file-hook   '(find-file-hook dired-initial-position-hook))
           (doom-run-hook-on 'doom-first-input-hook  '(pre-command-hook))
+          (doom-run-hook-on 'doom-first-buffer-hook '(find-file-hook doom-switch-buffer-hook)
+                            (lambda ()
+                              (not (member (buffer-name)
+                                           (list "*scratch*" (buffer-name (doom-fallback-buffer)))))))
 
           ;; If the user's already opened something (e.g. with command-line
           ;; arguments), then we should assume nothing about the user's
@@ -826,7 +829,7 @@ appropriately against `noninteractive' or the `cli' context."
 
           ;; This is the absolute latest a hook can run in Emacs' startup
           ;; process.
-          (advice-add #'command-line-1 :after #'doom-finalize)
+          (advice-add #'command-line-1 :after #'doom-finalize '((depth . 100)))
 
           (require 'doom-start)
           (let ((init-file (doom-profile-init-file doom-profile)))
@@ -864,7 +867,7 @@ appropriately against `noninteractive' or the `cli' context."
 
         ;; Ensure the CLI framework is ready.
         (require 'doom-cli)
-        (add-hook 'doom-cli-initialize-hook #'doom-finalize)
+        (add-hook 'doom-cli-initialize-hook #'doom-finalize 100)
 
         ;; HACK: site-lisp files can be obnoxiously noisy (emitting output that
         ;;   can pollute logs and isn't useful to (and may even alarm)

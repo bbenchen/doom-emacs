@@ -190,7 +190,12 @@ FUNCTION
       (if (derived-mode-p 'org-mode)
           (org-reveal '(4))
         (require 'reveal)
-        (reveal-post-command)))))
+        (reveal-post-command))))
+
+  ;; HACK: See magit/magit#5320: large/long status buffers can change the
+  ;;   behavior of motions and TAB in obscure ways.
+  ;; REVIEW: REmove when magit/magit#5320 is addressed.
+  (setq-hook! 'magit-status-mode-hook long-line-threshold nil))
 
 
 (use-package! forge
@@ -292,7 +297,7 @@ FUNCTION
 
   (after! git-rebase
     (dolist (key '(("M-k" . "gk") ("M-j" . "gj")))
-      (when-let (desc (assoc (car key) evil-collection-magit-rebase-commands-w-descriptions))
+      (when-let* ((desc (assoc (car key) evil-collection-magit-rebase-commands-w-descriptions)))
         (setcar desc (cdr key))))
     (evil-define-key* evil-collection-magit-state git-rebase-mode-map
       "gj" #'git-rebase-move-line-down

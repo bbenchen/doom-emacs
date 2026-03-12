@@ -381,7 +381,7 @@ Requires `anzu', also `evil-anzu' if using `evil-mode' for compatibility with
               (unless (or (null default-directory)
                           (null file-name)
                           (file-remote-p file-name))
-                (when-let (project-root (doom-project-root))
+                (when-let* ((project-root (doom-project-root)))
                   (file-relative-name (or buffer-file-truename (file-truename file-name))
                                       (concat project-root "..")))))))))
 
