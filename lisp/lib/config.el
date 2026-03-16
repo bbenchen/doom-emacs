@@ -63,7 +63,7 @@
             (if (equal status "finished\n")
                 (progn
                   (delete-window w)
-                  ,on-success)
+                  (with-current-buffer "*scratch*" ,on-success))
               ,on-failure))
           nil 'local)))))
 
@@ -95,8 +95,8 @@ Runs `doom-after-reload-hook' afterwards."
           (general-auto-unbind-keys)
           (unwind-protect
               (startup--load-user-init-file nil)
-            (general-auto-unbind-keys t)))
-        (doom-run-hooks 'doom-after-reload-hook)
+            (general-auto-unbind-keys t)
+            (doom-run-hooks 'doom-after-reload-hook)))
         (message "Config successfully reloaded!"))
     (user-error "Failed to reload your config")))
 
@@ -115,7 +115,7 @@ line."
   ;; TODO: Make this more robust
   (with-doom-context 'reload
     (dolist (file (mapcar #'car doom-profile-generators))
-      (when (string-match-p "/[0-9]+-loaddefs[.-]" file)
+      (when (string-match-p "^[0-9]+-loaddefs[.-]" file)
         (load (doom-path doom-profile-dir doom-profile-init-dir-name file)
               'noerror)))))
 
