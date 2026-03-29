@@ -7,7 +7,7 @@
 (package! compat
   :recipe (:host github :repo "emacs-compat/compat")
   :pin "38df650dce9f862c6b523de5b683573df590ab85")
-(unless (featurep 'igc)
+(unless (fboundp 'igc-info)
   (package! gcmh
     :pin "0089f9c3a6d4e9a310d0791cf6fa8f35642ecfd9"))
 
@@ -22,7 +22,7 @@
   :pin "09b789a8596cacca6bbff866500373541a85ffa2")
 
 ;; doom-ui.el
-(package! nerd-icons :pin "9a7f44db9a53567f04603bc88d05402cad49c64c")
+(package! nerd-icons :pin "1db0b0b9203cf293b38ac278273efcfc3581a05f")
 (package! hide-mode-line :pin "ddd154f1e04d666cd004bf8212ead8684429350d")
 
 ;; doom-editor.el
