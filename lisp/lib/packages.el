@@ -551,6 +551,8 @@ Grabs the latest commit id of the package using git."
   (cl-destructuring-bind (&key package plist _beg end)
       (or (doom--package-at-point)
           (user-error "Not on a `package!' call"))
+    (when (plist-get plist :freeze)
+      (user-error "%s: package is frozen" package))
     (let* ((recipe (doom--package-merge-recipes package plist))
            (branch (plist-get recipe :branch))
            (oldid (or (plist-get plist :pin)
@@ -1021,7 +1023,7 @@ Must be run from a magit diff buffer."
                                                     (env (plist-get plist :env)))
                                           (cl-loop for (var . val) in env
                                                    if (and (symbolp var)
-                                                           (string-prefix-p "_" (symbol-name var)))
+                                                           (not (string-prefix-p "_" (symbol-name var))))
                                                    do (set-default var val)
                                                    else if (and (stringp var) val)
                                                    do (setenv var val))))
