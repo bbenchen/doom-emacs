@@ -3,7 +3,6 @@
 (use-package! vterm
   :when (bound-and-true-p module-file-suffix)  ; requires dynamic-modules support
   :commands vterm-mode
-  :hook (vterm-mode . mode-line-invisible-mode) ; modeline serves no purpose in vterm
   :preface
   ;; HACK: Because vterm clusmily forces vterm-module.so's compilation on us
   ;;   when the package is loaded, this is necessary to prevent it when
@@ -32,4 +31,4 @@
     hscroll-margin 0)
 
   (add-hook! 'vterm-mode-hook :append #'doom-mark-buffer-as-real-h)
-  (add-hook! 'vterm-mode-hook :append #'hide-mode-line-mode))
+  (add-hook! 'vterm-mode-hook :append #'mode-line-invisible-mode))
