@@ -20,3 +20,6 @@
   (package! evil-markdown
     :recipe (:host github :repo "Somelauw/evil-markdown")
     :pin "8e6cc68af83914b2fa9fd3a3b8472573dbcef477"))
+
+(when (modulep! :checkers syntax +flymake)
+  (package! flymake-markdownlint :pin "59e3520668d9394c573e07b7980a2d48d9f6086c"))
