@@ -219,11 +219,11 @@
   :link '(url-link :tag "Website" "https://doomemacs.org")
   :group 'emacs)
 
-(defconst doom-version "2.1.0"
+(defconst doom-version "2.1.1"
   "Current version of Doom Emacs core.")
 
 ;; DEPRECATED: Remove these when the modules are moved out of core.
-(defconst doom-modules-version "26.06.0-pre"
+(defconst doom-modules-version "26.07.0-pre"
   "Current version of Doom Emacs.")
 
 (defvar doom-init-time nil
@@ -859,6 +859,7 @@ appropriately against `noninteractive' or the `cli' context."
 
         ;; Ensure the CLI framework is ready.
         (require 'doom-cli)
+        (doom-cli-initialize)
         (add-hook 'doom-cli-initialize-hook #'doom-finalize 100)
 
         ;; HACK: site-lisp files can be obnoxiously noisy (emitting output that
