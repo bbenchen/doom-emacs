@@ -1,3 +1,3 @@
 [submodule "sources/doom+"]
 	path = sources/doom+
-	url = https://github.com/doomemacs/modules
+	url = https://github.com/bbenchen/doom-modules.git
