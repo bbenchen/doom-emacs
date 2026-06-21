@@ -2,11 +2,11 @@
 ;;; Commentary:
 ;;; Code:
 
-(doom-require 'doom-lib 'packages)
+(require 'doom-packages)
 
 
 ;;
-;;; Variables
+;;; * Variables
 
 (defvar doom-after-sync-hook ()
   "Hooks run after 'doom sync' synchronizes the user's config with Doom.")
@@ -19,7 +19,7 @@
 
 
 ;;
-;;; Commands
+;;; * Commands
 
 (defcli! ((sync s))
     ((noenvvar? ("-e") "Don't regenerate the envvar file")
@@ -70,7 +70,8 @@ OPTIONS:
                   if (not (string-match-p " --script" args))
                   collect pid)))
     (add-hook 'kill-emacs-hook #'doom-sync--abort-warning-h)
-    (print! (item "Using Emacs %s @ %s") emacs-version (path invocation-directory invocation-name))
+    (unless (> (doom-cli-context-step context) 0)
+      (print! (item "Using Emacs %s @ %s") emacs-version (path invocation-directory invocation-name)))
     (when (doom-profiles-bootloadable-p)
       (call! '(profile sync "--all")))
     (run-hooks 'doom-before-sync-hook)
@@ -128,7 +129,7 @@ OPTIONS:
 
 
 ;;
-;;; Helpers
+;;; * Helpers
 
 (defun doom-sync--system-hash ()
   (secure-hash
@@ -146,8 +147,9 @@ OPTIONS:
          "")))
 
 (defun doom-sync--abort-warning-h ()
-  (print! (warn "Script was abruptly aborted, leaving Doom in an incomplete state!"))
-  (print! (item "Run 'doom sync' to repair it.")))
+  (when (/= doom-cli-exit-code 254)
+    (print! (warn "Script was abruptly aborted, leaving Doom in an incomplete state!"))
+    (print! (item "Run 'doom sync' to repair it."))))
 
 (provide 'doom-cli-sync)
 ;;; sync.el ends here
