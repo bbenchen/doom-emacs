@@ -115,7 +115,10 @@
         ((memq system-type '(gnu gnu/linux))              '(linux))
         ((memq system-type '(gnu/kfreebsd berkeley-unix)) '(linux bsd))
         ((eq system-type 'android)                        '(android)))
-  "A list of symbols denoting available features in the active Doom profile.")
+  "A list of symbols indicating the features in the active Doom profile.
+
+The first element should always be one of `macos', `windows', `linux', or
+`android'.")
 
 ;; Convenience aliases for internal use only (may be removed later).
 (defconst doom--system-windows-p (eq 'windows (car doom-system)))
@@ -319,29 +322,6 @@ For profile-local state files, use `doom-profile-state-dir' instead.")
   "Where generated files for the active profile (for Doom's core) are kept.")
 
 
-;;; ** Module file variables
-
-(defvar doom-module-init-file "init.el"
-  "The filename for module early initialization config files.
-
-Init files are loaded early, just after Doom core, and before modules' config
-files. They are always loaded, even in non-interactive sessions, and before
-`doom-before-modules-init-hook'. Related to `doom-module-config-file'.")
-
-(defvar doom-module-config-file "config.el"
-  "The filename for module configuration files.
-
-Config files are loaded later, and almost always in interactive sessions. These
-run before `doom-after-modules-config-hook' and after `doom-module-init-file'.")
-
-(defvar doom-module-packages-file "packages.el"
-  "The filename for the package configuration file.
-
-Package files are read whenever Doom's package manager wants a manifest of all
-desired packages. They are rarely read in interactive sessions (unless the user
-uses a straight or package.el command directly).")
-
-
 ;;
 ;;; * Custom hooks
 
@@ -447,7 +427,6 @@ safely cleaned up with \\='doom sync' or \\='doom gc'."
 
     (if interactive?
         (when (doom-context-push 'emacs)
-          (add-hook 'doom-after-init-hook #'doom-load-packages-incrementally-h 100)
           (add-hook 'doom-after-init-hook #'doom-display-benchmark-h 110)
           (doom-run-hook-on 'doom-first-file-hook   '(find-file-hook dired-initial-position-hook))
           (doom-run-hook-on 'doom-first-input-hook  '(pre-command-hook))
@@ -455,11 +434,6 @@ safely cleaned up with \\='doom sync' or \\='doom gc'."
                             (lambda ()
                               (not (member (buffer-name)
                                            `("*scratch*" ,doom-fallback-buffer-name)))))
-
-          ;; These fire `MAJOR-MODE-local-vars-hook' hooks, which is a Doomism.
-          ;; See the `MODE-local-vars-hook' section above.
-          (add-hook 'after-change-major-mode-hook #'doom-run-local-var-hooks-maybe-h 100)
-          (add-hook 'hack-local-variables-hook #'doom-run-local-var-hooks-h)
 
           ;; This is the absolute latest a hook can run in Emacs' startup
           ;; process.
@@ -556,13 +530,8 @@ Triggers `doom-after-init-hook' and sets `doom-init-time.'"
 
 (defun doom-startup ()
   "Fully load enabled modules and $DOOMDIR/config.el."
-  ;; Make sure this only runs at startup to protect us Emacs' interpreter
-  ;; re-evaluating `doom-startup-functions' when lazy-loading dynamic docstrings
-  ;; from the byte-compiled init file.
-  (when (or (doom-context-p 'startup)
-            (doom-context-p 'reload))
-    (require 'doom-emacs)  ; if called from CLI
-    (run-hook-with-args 'doom-startup-functions doom-profile)))
+  (require 'doom-emacs)  ; if called from CLI
+  (run-hook-with-args 'doom-startup-functions doom-profile))
 
 (defun doom-display-benchmark-h (&optional return-p)
   "Display a benchmark including number of packages and modules loaded.

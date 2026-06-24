@@ -8,8 +8,11 @@
 ;;
 ;;; * Variables
 
-(defvar doom-upgrade-url "https://github.com/doomemacs/core"
-  "The git repo url for Doom Emacs.")
+;;;###autoload
+(defcustom doom-upgrade-url "https://github.com/doomemacs/core"
+  "The git repo url for Doom Emacs."
+  :type 'string
+  :group 'doom-cli)
 
 (defvar doom-upgrade-remote "_upgrade"
   "The name to use as our staging remote.")
@@ -62,6 +65,19 @@ libraries. It is the equivalent of the following shell commands:
       ;; Major changes will still break, however
       (print! (item "Reloading Doom Emacs"))
       (doom-cli-context-put context 'upgrading t)
+
+      ;; If users byte-compile Doom (or misconfigure `compile-angel'), this can
+      ;; leave Doom in a broken state post-upgrade, and cause other odd errors
+      ;; in interactive sessions.
+      (when-let*
+          ((elc (doom-files-in (cons doom-core-dir doom-module-load-path)
+                               :follow-symlinks nil
+                               :match "\\.elc\\$")))
+        (print! (start "Cleaning up byte-compiled files in Doom core..."))
+        (dolist (file elc)
+          (print! (item "Deleted %s") (path file))
+          (ignore-errors (delete-file file))))
+
       (exit! "doom" "upgrade" "-p"
              (if aot? "--aot")
              (if nobuild? "-B")

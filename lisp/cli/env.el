@@ -5,7 +5,8 @@
 ;;
 ;;; * Variables
 
-(defvar doom-env-deny
+;;;###autoload
+(defcustom doom-env-deny
   '(;; Unix/shell state that shouldn't be persisted
     "^HOME$" "^\\(OLD\\)?PWD$" "^SHLVL$" "^PS1$" "^R?PROMPT$" "^TERM\\(CAP\\)?$"
     "^USER$" "^GIT_CONFIG" "^INSIDE_EMACS$"
@@ -26,13 +27,18 @@
     "^DOOM\\(PATH\\|PROFILE\\)$" "^__")
   "Environment variables to omit from envvar files.
 
-Each string is a regexp, matched against variable names.")
+Each string is a regexp, matched against variable names."
+  :type '(repeat regexp)
+  :group 'doom-cli)
 
-(defvar doom-env-allow '()
+;;;###autoload
+(defcustom doom-env-allow '()
   "Environment variables to include in envvar files.
 
 This overrules `doom-env-deny'. Each string is a regexp, matched against
-variable names.")
+variable names."
+  :type '(repeat regexp)
+  :group 'doom-cli)
 
 
 ;;
@@ -98,7 +104,8 @@ Why this over exec-path-from-shell?
               ";;;###if (or initial-window-system (daemonp))\n"
               ";;;###allow " (prin1-to-string allow) "\n"
               ";;;###deny "  (prin1-to-string deny) "\n"
-              ";;;###date "  (format-time-string "%Y-%m-%d %H:%M:%S") "\n\n")
+              ";;;###date "  (format-time-string "%Y-%m-%d %H:%M:%S") "\n"
+              "(put 'process-environment 'doom t)\n")
       (let ((deny  (append deny doom-env-deny))
             (allow (append allow doom-env-allow))
             envvars)
@@ -126,6 +133,10 @@ Why this over exec-path-from-shell?
             (current-buffer))
         (if (equal output-file "-")
             (print! "%s" (string-trim-right (buffer-string)))
+          (let ((dir (file-name-directory output-file)))
+            (unless (file-directory-p dir)
+              (print! (error "Containing directory does not exist: %s" dir))
+              (exit! 1)))
           (write-region nil nil output-file)
           (print-group!
             (print! (success "Wrote %s") (filename output-file))))))
