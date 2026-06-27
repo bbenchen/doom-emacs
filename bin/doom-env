@@ -22,7 +22,7 @@
     "SOCK\\(ET\\)?$"
     ;; ssh and gpg variables that could quickly become stale if persisted.
     "^SSH_\\(AUTH_SOCK\\|AGENT_PID\\)$" "^\\(SSH\\|GPG\\)_TTY$"
-    "^GPG_AGENT_INFO$"
+    "^GPG_AGENT_INFO$" "^PINENTRY_USER_DATA$"
     ;; Internal Doom envvars
     "^DEBUG$" "^INSECURE$" "^\\(EMACS\\|DOOM\\(LOCAL\\)?\\)DIR$"
     "^DOOM\\(PATH\\|PROFILE\\)$" "^__")
