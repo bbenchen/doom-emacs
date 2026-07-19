@@ -464,14 +464,9 @@ caches them in `doom--profiles'. If RELOAD? is non-nil, refresh the cache."
    `(";; -*- lexical-binding: t; no-byte-compile t; -*-"
      ";;;###if noninteractive"
      ,@(doom-loaddefs-scan
-        (cl-loop for dir in (doom-module-load-path nil t)
-                 append (doom-glob dir doom-module-cli-file))
         (doom-glob doom-core-dir "cli/*.el")
-        (seq-filter
-         #'doom-cli-executable-p
-         (cl-loop for dir in doom-cli-load-path
-                  append (doom-glob dir "doom-*")
-                  append (doom-glob dir "doom-*.el")))))))
+        (cl-loop for dir in (doom-module-load-path nil t)
+                 append (doom-glob dir doom-module-cli-file))))))
 
 (defun doom-profile--generate-user-init-loader (_profile)
   (doom-file-write
@@ -499,9 +494,7 @@ caches them in `doom--profiles'. If RELOAD? is non-nil, refresh the cache."
    `((defun doom--startup-loaddefs-modules (_profile)
        ,@(doom-loaddefs-scan
           (doom-glob doom-core-dir "lib/*.el")
-          (cl-loop for dir
-                   in (append (doom-module-load-path :all t)
-                              (list doom-user-dir))
+          (cl-loop for dir in (doom-module-load-path :all t)
                    if (doom-glob dir "autoload.el") collect (car it)
                    if (doom-glob dir "autoload/*.el") append it)))
      (add-hook 'doom-startup-functions #'doom--startup-loaddefs-modules 60))))
@@ -514,16 +507,34 @@ caches them in `doom--profiles'. If RELOAD? is non-nil, refresh the cache."
           ;; Create a list of packages starting with the Nth-most dependencies
           ;; by walking the package dependency tree depth-first. This ensures
           ;; any load-order constraints in package autoloads are always met.
-          (let (packages)
+          (let (autoloads)
             (letf! (defun* walk-packages (pkglist)
                      (cond ((null pkglist) nil)
                            ((stringp pkglist)
-                            (walk-packages (nth 1 (gethash pkglist straight--build-cache)))
-                            (cl-pushnew pkglist packages :test #'equal))
+                            (let ((sym (intern pkglist)))
+                              (if-let* ((deps (and
+                                               (not (eq (plist-get
+                                                         (alist-get sym doom-packages)
+                                                         :type)
+                                                        'built-in))
+                                               (gethash pkglist straight--build-cache))))
+                                  (progn
+                                    (walk-packages (nth 1 deps))
+                                    (cl-pushnew (straight--autoloads-file pkglist)
+                                                autoloads
+                                                :test #'equal))
+                                ;; Handle system-installed packages (e.g.
+                                ;; installed via OS package manager)
+                                (when-let* ((desc (car (alist-get sym package-alist))))
+                                  (walk-packages (cl-loop for req in (package-desc-reqs desc)
+                                                          collect (symbol-name (car req))))
+                                  (cl-pushnew (format
+                                               "%s.el" (package--autoloads-file-name desc))
+                                              autoloads :test #'equal)))))
                            ((listp pkglist)
                             (mapc #'walk-packages (reverse pkglist)))))
               (walk-packages (mapcar #'symbol-name (mapcar #'car doom-packages))))
-            (mapcar #'straight--autoloads-file (nreverse packages))))
+            (nreverse autoloads)))
        ,@(when-let* ((info-dirs
                       (cl-loop for dir in load-path
                                if (file-exists-p (doom-path dir "dir"))
