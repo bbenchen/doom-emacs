@@ -109,6 +109,15 @@
                       (t "doom-help:"))))
       :align right))))
 
+(defvar doom-docs-notice-types
+  '(("wip"     . "󱌣")
+    ("tip"     . "󰐃")
+    ("kudos"   . "󰔓")
+    ("aside"   . "󰟶")
+    ("notice"  . "󰥔")
+    ("warning" . ""))
+  "An alist mapping Doom notice types to icons.")
+
 
 ;;
 ;;; * Helpers
@@ -386,6 +395,44 @@
                                   '(display))))
       (org-element-cache-refresh (point)))))
 
+(defun doom-docs--prettify-notices-h ()
+  "Render notices with an icon and indentation."
+  (org-with-wide-buffer
+   (goto-char (point-min))
+   (remove-overlays (point-min) (point-max) 'doom-docs t)
+   (when doom-docs-minor-mode
+     (let ((re (format "^\\( *\\)#\\+begin_quote +%s"
+                       (regexp-opt (mapcar #'car doom-docs-notice-types)
+                                   t))))
+       (while (re-search-forward re nil t)
+         (unless (doom-docs--visible-p (point))
+           (let* ((icon (propertize (format " %s "
+                                            (cdr (assoc (match-string 2)
+                                                        doom-docs-notice-types)))
+                                    'face 'org-quote))
+                  (prefix (propertize " " 'display
+                                      `(space :width ,(if (fboundp 'string-pixel-width)  ; Emacs 29+
+                                                          (list (string-pixel-width icon))
+                                                        (1+ (string-width icon))))
+                                      'face 'org-quote))
+                  (indent (match-string-no-properties 1))
+                  (begoff (length indent))
+                  (beg (save-excursion (goto-char (match-end 1))
+                                       (point-at-bol 2)))
+                  (end (save-excursion
+                         (save-match-data
+                           (search-forward (concat indent "#+end_quote") nil)
+                           (point-at-bol)))))
+             ;; Using `before-string' instead of `line-prefix' because
+             ;; `org-indent-mode' will highjack the latter.
+             (goto-char beg)
+             (while (and (< (point) end)
+                         (not (eobp)))
+               (let ((ov (make-overlay (point-at-bol) (+ (point-at-bol) begoff))))
+                 (overlay-put ov 'after-string (if (= (point) beg) icon prefix))
+                 (overlay-put ov 'doom-docs t))
+               (forward-line 1)))))))))
+
 
 ;;
 ;;; * `doom-docs-minor-mode'
@@ -455,22 +502,14 @@ This primes `org-mode' for reading."
            #'doom-docs--hide-drawers-h
            ;; #'doom-docs--hide-stars-h
            #'doom-docs--expand-macros-h
-           #'doom-docs--hide-src-blocks-h)
+           #'doom-docs--hide-src-blocks-h
+           #'doom-docs--prettify-notices-h)
 
 
 ;;
 ;;; * `doom-docs-mode'
 
-(defvar doom-docs-font-lock-keywords
-  '(("^\\( *\\)#\\+begin_quote\n\\1 \\([󰝗󱌣󰐃󰔓󰟶󰥔]\\) "
-     2 (pcase (match-string 2)
-         ("󰝗" 'font-lock-comment-face)
-         ("󱌣" 'font-lock-comment-face)
-         ("󰐃" 'error)
-         ("󰔓" 'success)
-         ("󰟶" 'font-lock-keyword-face)
-         ("󰥔" 'font-lock-constant-face)
-         ("" 'warning))))
+(defvar doom-docs-font-lock-keywords '()
   "Extra font-lock keywords for Doom documentation.")
 
 (defvar doom-docs-mode-map
@@ -616,8 +655,8 @@ exist, and `org-link' otherwise."
            key
            :complete (lambda ()
                        (if requires (mapc #'require (ensure-list requires)))
-		       (doom-docs--relative-path (doom-docs--read-link-path key (funcall dir-fn))
-						 (funcall dir-fn)))
+                       (doom-docs--relative-path (doom-docs--read-link-path key (funcall dir-fn))
+                                                 (funcall dir-fn)))
            :follow   (lambda (link)
                        (org-link-open-as-file (expand-file-name link (funcall dir-fn)) nil))
            :face     (lambda (link)
@@ -644,12 +683,12 @@ exist, and `org-link' otherwise."
 (let (cache)
   (defun doom-docs--help-echo-fn (_window object pos)
     (if (equal (car cache) (cons object pos))
-	(cdr cache)
+        (cdr cache)
       (let ((link (with-current-buffer object
-		    (save-excursion (goto-char pos) (org-element-context)))))
-	(cdr (setq cache
-		   (cons (cons object (org-element-property :begin link))
-			 (doom-docs--help-string link))))))))
+                    (save-excursion (goto-char pos) (org-element-context)))))
+        (cdr (setq cache
+                   (cons (cons object (org-element-property :begin link))
+                         (doom-docs--help-string link))))))))
 
 (defun doom-docs--help-string (link)
   (pcase (org-element-property :type link)
@@ -657,14 +696,14 @@ exist, and `org-link' otherwise."
      (concat
       "The key sequence: "
       (propertize (doom-docs--describe-kbd (org-element-property :path link))
-		  'face 'help-key-binding)))
+                  'face 'help-key-binding)))
     ("cmd"
      (concat
       "The command "
       (propertize (org-element-property :path link) 'face 'font-lock-function-name-face)
       " can be invoked with the key sequence "
       (propertize (doom-docs--command-keys (org-element-property :path link))
-		  'face 'help-key-binding)))
+                  'face 'help-key-binding)))
     ("doom-package"
      (concat
       (propertize "Emacs package " 'face 'bold)
@@ -672,9 +711,9 @@ exist, and `org-link' otherwise."
       ", currently "
       (cond
        ((featurep (intern-soft (org-element-property :path link)))
-	(propertize "installed and loaded" 'face 'success))
+        (propertize "installed and loaded" 'face 'success))
        ((locate-library (org-element-property :path link))
-	(propertize "installed but not loaded" 'face 'warning))
+        (propertize "installed but not loaded" 'face 'warning))
        (t (propertize "not installed" 'face 'error )))))
     ("doom-module"
      (concat
@@ -682,21 +721,21 @@ exist, and `org-link' otherwise."
       (propertize (org-element-property :path link) 'face 'font-lock-keyword-face)
       ", currently "
       (cl-destructuring-bind (&key category module flag)
-	  (doom-docs--read-module-spec (org-element-property :path link))
-	(cond
-	 ((doom-module-active-p category module)
-	  (propertize "enabled" 'face 'success))
-	 ((and category (doom-module-locate-path (cons category module)))
-	  (propertize "disabled" 'face 'error))
-	 (t (propertize "unknown" 'face '(bold error)))))))
+          (doom-docs--read-module-spec (org-element-property :path link))
+        (cond
+         ((doom-module-active-p category module)
+          (propertize "enabled" 'face 'success))
+         ((and category (doom-module-locate-path (cons category module)))
+          (propertize "disabled" 'face 'error))
+         (t (propertize "unknown" 'face '(bold error)))))))
     ("doom-executable"
      (concat
       (propertize "System executable " 'face 'bold)
       (propertize (org-element-property :path link) 'face 'font-lock-keyword-face)
       ", "
       (if (executable-find (org-element-property :path link))
-	  (propertize "found" 'face 'success)
-	(propertize "not found" 'face 'error))
+          (propertize "found" 'face 'success)
+        (propertize "not found" 'face 'error))
       " on PATH"))))
 
 ;;;###autoload
@@ -704,20 +743,20 @@ exist, and `org-link' otherwise."
   "TODO"
   (let ((keystr (doom-docs-link-read-desc-at-point default context)))
     (dolist (key `(("<leader>" . ,doom-leader-key)
-		   ("<localleader>" . ,doom-localleader-key)
-		   ("<prefix>" . ,(if (bound-and-true-p evil-mode)
-				      (concat doom-leader-key " u")
-				    "C-u"))
-		   ("<help>" . ,(if (bound-and-true-p evil-mode)
-				    (concat doom-leader-key " h")
-				  "C-h"))
-		   ("\\<M-" . "alt-")
-		   ("\\<S-" . "shift-")
-		   ("\\<s-" . "super-")
-		   ("\\<C-" . "ctrl-")))
+                   ("<localleader>" . ,doom-localleader-key)
+                   ("<prefix>" . ,(if (bound-and-true-p evil-mode)
+                                      (concat doom-leader-key " u")
+                                    "C-u"))
+                   ("<help>" . ,(if (bound-and-true-p evil-mode)
+                                    (concat doom-leader-key " h")
+                                  "C-h"))
+                   ("\\<M-" . "alt-")
+                   ("\\<S-" . "shift-")
+                   ("\\<s-" . "super-")
+                   ("\\<C-" . "ctrl-")))
       (setq keystr
-	    (replace-regexp-in-string (car key) (cdr key)
-				      keystr t t)))
+            (replace-regexp-in-string (car key) (cdr key)
+                                      keystr t t)))
     keystr))
 
 (defun doom-docs--read-module-spec (module-spec-str)
@@ -861,19 +900,6 @@ exist, and `org-link' otherwise."
   "TODO"
   (doom/describe-package (intern-soft pkg)))
 
-(defun doom-docs--executable-link-activate-fn (start end executable _bracketed-p)
-  (when buffer-read-only
-    (let ((found (executable-find executable)))
-      (add-text-properties
-       start end
-       (list 'display
-             (concat
-              (nerd-icons-octicon "nf-oct-terminal" ; ""
-                                  :face (if found 'success 'error))
-              " "
-              (propertize executable
-                          'face (if found 'org-verbatim 'shadow))))))))
-
 
 ;;
 ;;; * Org config
@@ -933,11 +959,6 @@ exist, and `org-link' otherwise."
      :follow #'doom-docs--module-link-follow-fn
      :activate-func #'doom-docs--module-link-activate-fn
      :help-echo #'doom-docs--help-echo-fn)
-    (org-link-set-parameters
-     "doom-executable"
-     :activate-func #'doom-docs--executable-link-activate-fn
-     :help-echo #'doom-docs--help-echo-fn
-     :face 'org-verbatim)
     (org-link-set-parameters
      "doom-ref"
      :follow (lambda (link)
