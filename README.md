@@ -5,11 +5,11 @@
 [Install](#install) • [Documentation] • [FAQ] • [Screenshots] • [Contribute](#contribute)
 
 ![Made with Doom Emacs](https://img.shields.io/github/tag/doomemacs/core.svg?style=flat-square&label=release&color=58839b)
-![Supports Emacs 27.1–30.2](https://img.shields.io/badge/Supports-Emacs_27.1–30.2-blueviolet.svg?style=flat-square&logo=GNU%20Emacs&logoColor=white)
+![Supports Emacs 27.1–31.1](https://img.shields.io/badge/Supports-Emacs_27.1–31.1-blueviolet.svg?style=flat-square&logo=GNU%20Emacs&logoColor=white)
 ![Latest commit](https://img.shields.io/github/last-commit/doomemacs/core?style=flat-square)
 <!-- ![Build status: master](https://img.shields.io/github/workflow/status/doomemacs/core/CI/master?style=flat-square) -->
 [![Discord Server](https://img.shields.io/discord/406534637242810369?color=738adb&label=Discord&logo=discord&logoColor=white&style=flat-square)][discord]
-[![Discussions board](https://img.shields.io/github/discussions/doomemacs/community?label=Discussions&logo=github&style=flat-square)][discuss]
+[![Github Discussions](https://img.shields.io/github/discussions/doomemacs/community?label=Discussions&logo=github&style=flat-square)][discuss]
 
 ![Doom Emacs Screenshot](https://raw.githubusercontent.com/doomemacs/core/screenshots/main.png)
 
@@ -99,10 +99,9 @@ Check out [the FAQ][FAQ] for answers to common questions about the project.
 
 # Prerequisites
 - **Required:**
-  - GNU Emacs 27.1–30.2 (30.2 is recommended)
-    - If only using Doom's core, 27.1+ is required.
-    - If using Doom's modules (especially tree-sitter support), 29.1+ is
-      required.
+  - GNU Emacs 27.1–31.1 (31.1 is recommended)
+    - Using only Doom's CLI requires 27.1+
+    - Using Doom as a starter kit requires 29.1+
   - Git >= 2.23
   - [ripgrep] >= 11.0
 - **Optional, but recommended:**
@@ -217,11 +216,27 @@ kind!
   [liberapay] or [paypal]. My work contends with studies, adventures in indie
   gamedev and freelance work. Donations help me allocate more time to my Emacs
   and OSS capers.
+  
+## LLM Policy
+
+Generative AI is not used in the development of this project (except to test,
+debug, and improve [LLM
+modules](https://github.com/doomemacs/modules/tree/main/modules/tools/llm)).
+LLM-generated (or assisted) contributions are **highly** discouraged, but
+tolerated so long as they meet the following criteria:
+
+1. LLM-generated contributions are small,
+2. LLM-use is disclosed,
+3. [Issue](https://github.com/doomemacs/.github/blob/main/.github/ISSUE_TEMPLATE/bug_report.yml) and [pull request](https://github.com/doomemacs/.github/blob/main/.github/PULL_REQUEST_TEMPLATE.md) templates are followed (it is disruptive when LLMs omit key information and AI disclosures, or follow arbitrary heading structures),
+4. A human responds to reviews and questions.
+
+Failing that, related issues/PRs will be immediately closed and refused with
+notice. Repeat offenders will be banned.
 
 
 [contribute]: docs/contributing.org
-[discord]: https://doomemacs.org/discord
-[discuss]: https://doomemacs.org/discuss
+[discord]: https://discord.doomemacs.org
+[discuss]: https://discuss.doomemacs.org
 [community-faq]: https://github.com/doomemacs/community?tab=readme-ov-file#frequently-asked-questions
 [documentation]: docs/index.org
 [faq]: https://github.com/doomemacs/core/blob/master/docs/faq.org
