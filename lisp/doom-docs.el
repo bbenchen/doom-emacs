@@ -81,6 +81,9 @@
 
 Falls back to unicode icons, where specified, omitting icons otherwise.")
 
+(defvar doom-docs-enable-view-mode t
+  "If non-nil, activate `doom-docs-view-mode' when entering `doom-docs-mode'.")
+
 (defvar doom-docs--id-locations nil)
 (defvar doom-docs--id-files nil)
 (defvar doom-docs--id-location-file (doom-profile-cache-dir t "doom-docs-org-ids"))
@@ -728,21 +731,16 @@ This primes `org-mode' for reading."
       ;; docs with read-only mode off don't need to be pretty.
       (when (bound-and-true-p org-modern-mode)
         (org-modern-mode -1))
-      (doom-docs--locations-load nil (list (current-buffer))))))
-
-;;;###autoload
-(defun doom-docs-view-mode-h ()
-  "Activate `read-only-mode' if the current file exists and is non-empty."
-  ;; The rationale: if it's empty or non-existant, you want to write an org
-  ;; file, not read it.
-  (let ((file-name (buffer-file-name (buffer-base-buffer))))
-    (when (and file-name
-               (> (buffer-size) 0)
-               (not (string-prefix-p "." (file-name-base file-name)))
-               (file-exists-p file-name))
-      (doom-docs-view-mode +1))))
-
-(add-hook 'doom-docs-mode-hook #'doom-docs-view-mode-h)
+      (doom-docs--locations-load nil (list (current-buffer)))
+      (when doom-docs-enable-view-mode
+        (let ((file-name (buffer-file-name (buffer-base-buffer))))
+          ;; The rationale: if it's empty or non-existant, you want to write an
+          ;; org file, not read it.
+          (when (and file-name
+                     (> (buffer-size) 0)
+                     (not (string-prefix-p "." (file-name-base file-name)))
+                     (file-exists-p file-name))
+            (doom-docs-view-mode +1)))))))
 
 
 ;;
@@ -778,11 +776,12 @@ This primes `org-mode' for reading."
     (let* ((context (org-element-context (org-element-at-point-no-context beg)))
            (desc (doom-docs--get-link-description context t)))
       (when-let* ((link (or (if (string-empty-p target) desc) target)))
-        (when buffer-read-only
-          (when-let* ((type (org-element-property :type context))
-                      (icon (org-link-get-parameter type :activate-icon))
-                      (icon (if (functionp icon) (funcall icon link) icon)))
-            (add-text-properties beg (1+ beg) `(display ,(concat icon " ")))))
+        (if-let* ((buffer-read-only)
+                  (type (org-element-property :type context))
+                  (icon (org-link-get-parameter type :activate-icon))
+                  (icon (if (functionp icon) (funcall icon link) icon)))
+            (add-text-properties beg (1+ beg) `(display ,(concat icon " ")))
+          (remove-text-properties beg (1+ beg) '(display t)))
         (unless desc
           (let ((offset (if bracket? 2 0))
                 tagend)
@@ -813,7 +812,9 @@ This primes `org-mode' for reading."
                                   "C-u"))
                  ("<help>" . "C-h")
                  ,@(when user-friendly?
-                     '(("\\<M-" . "Meta-")
+                     '(("RET" . "Return")
+                       ("SPC" . "Space")
+                       ("\\<M-" . "Meta-")
                        ("\\<S-" . "Shift-")
                        ("\\<s-" . "super-")
                        ("\\<C-" . "Ctrl-"))))
@@ -822,20 +823,30 @@ This primes `org-mode' for reading."
           (replace-regexp-in-string (car key) (cdr key)
                                     keystr t t))))
 
-(defun doom-docs-link--kbd-activate (beg end key _)
-  (when buffer-read-only
-    (let* ((context (doom-docs-context-at-pos beg))
-           (key (doom-docs--get-link-description context))
-           (keystr (doom-docs-link--kbd key))
+(defun doom-docs-link--kbd-follow (key)
+  (message "%s %s"
+           (propertize "Key sequence:" 'face 'bold)
+           (doom-docs-link--kbd key t)))
+
+(defun doom-docs-link--kbd-activate-func (beg end key _bracketed?)
+  (if (not org-descriptive-links)
+      (remove-text-properties beg end '(display nil))
+    (let* ((keystr (doom-docs-link--kbd key))
            (total (max 0 (- (string-width key)
-                            (string-width keystr)))))
+                            (string-width keystr))))
+           (keybeg (save-excursion
+                     (goto-char beg)
+                     (skip-chars-forward "^:" end)
+                     (1+ (point)))))
+      ;; Hide kbd:
       (add-text-properties
-       (if (string-empty-p (org-element-property :path context))
-           beg
-         (+ beg 3 (string-width (org-element-property :type context))))
-       end `(display
-             ,(propertize (concat keystr (make-string total ?\s))
-                          'face 'doom-docs-kbd))))))
+       beg keybeg `(invisible t intangible t cursor-intangible t))
+      ;; Resolve keybinds in str:
+      (when buffer-read-only
+        (add-text-properties
+         beg end `(display
+                   ,(propertize (concat keystr (make-string total ?\s))
+                                'face 'doom-docs-kbd)))))))
 
 (defun doom-docs-link--kbd-help-echo (window object pos)
   (with-selected-window window
@@ -848,14 +859,16 @@ This primes `org-mode' for reading."
 
 ;;; ** M-x:*
 
-(defun doom-docs-link--M-x-activate-func (beg end target bracketed?)
-  (when org-descriptive-links
-    (let ((context (org-element-context (org-element-at-point-no-context beg))))
-      (unless (doom-docs--get-link-description context t)
-        (let ((offset (if bracketed? 2 0)))
-          (add-text-properties
-           (+ beg offset 3) (+ beg offset 4)
-           '(display " ")))))))
+(defun doom-docs-link--M-x-activate-func (beg end _target _bracketed?)
+  (let ((pt (save-excursion (goto-char beg)
+                            (skip-chars-forward "^:" end)
+                            (point))))
+    (if (or (not org-descriptive-links)
+            (doom-docs--get-link-description
+             (org-element-context (org-element-at-point-no-context beg))
+             t))
+        (remove-text-properties pt (1+ pt) '(display nil))
+      (add-text-properties pt (1+ pt) '(display " ")))))
 
 
 ;;; ** repo:*
@@ -1174,8 +1187,9 @@ This primes `org-mode' for reading."
        :help-desc (fn! (function-documentation (intern-soft %))))
       (org-link-set-parameters
        "kbd"
+       :follow #'doom-docs-link--kbd-follow
        :face 'doom-docs-kbd
-       :activate-func #'doom-docs-link--kbd-activate
+       :activate-func #'doom-docs-link--kbd-activate-func
        :help-echo #'doom-docs-link--kbd-help-echo)
       (org-link-set-parameters
        "repo"
@@ -1262,17 +1276,21 @@ If FORCE? is non-nil, do it even if they're already loaded."
   (doom-docs--abbr-populate force?))
 
 ;;;###autoload
-(defun doom/docs (&optional file interactive?)
+(defun doom/docs (&optional file)
   "View Doom's documentation FILE.
 
 If the prefix arg is set, open docs.doomemacs.org instead.
 
-\(fn &optional FILE INTERACTIVE?)"
-  (interactive '(nil interactive))
-  (if current-prefix-arg
-      (browse-url "https://docs.doomemacs.org")
-    (doom-docs-find-file (or file (doom-path doom-docs-dir "index.org"))
-                         (if interactive? "Loading Doom manual..."))))
+\(fn &optional FILE)"
+  (interactive)
+  (doom-docs-find-file (or file (doom-path doom-docs-dir "index.org"))
+                       "Loading Doom manual..."))
+
+;;;###autoload
+(defun doom/docs-find-file (&optional file)
+  "Browse `doom-docs-dir'."
+  (interactive (list (read-file-name "Find docs file: " doom-docs-dir "index.org" t)))
+  (doom-docs-find-file file "Loading Doom docs file..."))
 
 ;;;###autoload
 (defun doom/docs-module (key &optional visit-dir?)

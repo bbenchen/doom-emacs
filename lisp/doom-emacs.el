@@ -295,11 +295,6 @@ Otherwise, `en/disable-command' (in novice.el.gz) is hardcoded to write them to
 ;;
 ;;; * Global defaults
 
-;; Background native compilation consumes several CPU cores and takes minutes to
-;; complete. Not worth the extra stress when on battery power.
-(setq native-comp-async-on-battery-power nil)  ; introduced in Emacs 31.1
-
-
 ;;; ** Stricter security defaults
 
 ;; Emacs is essentially one huge security vulnerability, what with all the
@@ -382,8 +377,8 @@ Otherwise, `en/disable-command' (in novice.el.gz) is hardcoded to write them to
 ;; Trust the contents of $EMACSDIR and $DOOMDIR, because the user will likely be
 ;; working with either/both.
 (when (boundp 'trusted-content)
-  (add-to-list 'trusted-content (file-truename doom-emacs-dir))
-  (add-to-list 'trusted-content (file-truename doom-user-dir)))
+  (add-to-list 'trusted-content (abbreviate-file-name (file-truename doom-emacs-dir)))
+  (add-to-list 'trusted-content (abbreviate-file-name (file-truename doom-user-dir))))
 
 ;; Ensure .dir-locals.el in $EMACSDIR and $DOOMDIR are always respected
 (add-to-list 'safe-local-variable-directories doom-emacs-dir)
@@ -1652,17 +1647,14 @@ with `set-indent-vars!'."
 
   ;; PERF: Text properties inflate the size of recentf's files, and there is no
   ;;   reason to persist them (must be first in `recentf-filename-handlers'!)
-  (add-to-list 'recentf-filename-handlers #'substring-no-properties)
+  ;; DEPRECATED: Remove when 30.x support is dropped
+  ;;   (see emacs-mirror/emacs@6b901a8e8598)
+  (when (< emacs-major-version 31)
+    (add-to-list 'recentf-filename-handlers #'substring-no-properties))
 
   ;; UX: Reorder the recent files list by frecency (i.e. every time you touch a
   ;;   buffer, bump it to the top of the list).
-  (add-hook! '(doom-switch-window-hook write-file-functions)
-    (defun doom--recentf-touch-buffer-h ()
-      "Bump file in recent file list when it is switched or written to."
-      (when buffer-file-name
-        (recentf-add-file buffer-file-name))
-      ;; Return nil for `write-file-functions'
-      nil))
+  (add-hook 'doom-switch-window-hook #'recentf-track-opened-file)
   (add-hook! 'dired-mode-hook
     (defun doom--recentf-add-dired-directory-h ()
       "Add dired directories to recentf file list."
@@ -1694,19 +1686,19 @@ with `set-indent-vars!'."
         savehist-additional-variables
         '(kill-ring                        ; persist clipboard
           register-alist                   ; persist macros
-          mark-ring global-mark-ring       ; persist marks
           search-ring regexp-search-ring)) ; persist searches
   (add-hook! 'savehist-save-hook
     (defun doom-savehist-unpropertize-variables-h ()
-      "Remove text properties from `kill-ring' to reduce savehist cache size."
-      (setq kill-ring
-            (mapcar #'substring-no-properties
-                    (cl-remove-if-not #'stringp kill-ring))
-            register-alist
-            (cl-loop for (reg . item) in register-alist
-                     if (stringp item)
-                     collect (cons reg (substring-no-properties item))
-                     else collect (cons reg item))))
+      "Strip text properties from vars to reduce size and serialization errors."
+      (letf! (defun* strip-properties (tree)
+               (cond ((stringp tree) (substring-no-properties tree))
+                     ((consp tree) (cons (strip-properties (car tree))
+                                         (strip-properties (cdr tree))))
+                     (tree)))
+        (dolist (var (append savehist-additional-variables
+                             savehist-minibuffer-history-variables))
+          (when (boundp var)
+            (set var (strip-properties (symbol-value var)))))))
     (defun doom-savehist-remove-unprintable-registers-h ()
       "Remove unwriteable registers (e.g. containing window configurations).
 Otherwise, `savehist' would discard `register-alist' entirely if we don't omit

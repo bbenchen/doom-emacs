@@ -222,8 +222,9 @@ the value of the last one, or nil if there are none."
                            (> level doom-log-level)))
         (absolute? (string-prefix-p ":" text)))
     (apply #'message
-           (propertize (concat "* %.06f:%s" (if (not absolute?) ":") text)
+           (propertize (concat "* %d:%.06f:%s" (if (not absolute?) ":") text)
                        'face 'font-lock-doc-face)
+           level
            (float-time (time-subtract (current-time) before-init-time))
            (mapconcat
             (lambda (x) (format "%s" x))
@@ -245,8 +246,7 @@ the value of the last one, or nil if there are none."
                      (setq message (pop args)))
                  2)))
     `(when (and (not doom-inhibit-log)
-                (or (not noninteractive)
-                    (<= ,level doom-log-level)))
+                (<= ,level doom-log-level))
        (doom--log ,level ,message ,@args))))
 
 
@@ -399,7 +399,7 @@ Can also load Doom's subfeatures, e.g. (doom-require \\='doom-lib \\='files)"
 (defun doom-run-hook (hook)
   "Run HOOK (a hook function) with better error handling.
 Meant to be used with `run-hook-wrapped'."
-  (doom-log 3 "hook:%s: run %s" (or doom--hook '*) hook)
+  (doom-log 3 "hook:%s: run %S in %S" (or doom--hook '*) hook (current-buffer))
   (condition-case-unless-debug e
       (funcall hook)
     (error
@@ -654,7 +654,7 @@ The def* forms accepted are:
   (setq body (macroexp-progn body))
   (when (memq (car bindings) '(defun defun* defun! defmacro defadvice))
     (setq bindings (list bindings)))
-  (dolist (binding (nreverse bindings) body)
+  (dolist (binding (reverse bindings) body)
     (setq
      body (pcase binding
             (`(defmacro . ,rest) `(cl-macrolet (,rest) ,body))
@@ -1118,9 +1118,10 @@ to reverse this and trigger `after!' blocks at a more reasonable time."
          ;; code, which would prematurely trigger this. In those cases, well
          ;; behaved plugins will use `delay-mode-hooks', which we can check for:
          (unless delay-mode-hooks
-           ;; ...Otherwise, announce to the world this package has been loaded,
-           ;; so `after!' handlers can react.
-           (provide ',feature)
+           (unless (featurep ',feature)
+             ;; ...Otherwise, announce to the world this package has been
+             ;; loaded, so `after!' handlers can react.
+             (provide ',feature))
            (dolist (fn ',fns)
              (advice-remove fn #',advice-fn)))))))
 
