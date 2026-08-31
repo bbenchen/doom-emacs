@@ -1008,7 +1008,9 @@ If this is a daemon session, load them all immediately instead."
 
 (defun doom-run-switch-buffer-hooks-h (&optional _)
   "Trigger `doom-switch-buffer-hook' when selecting a new buffer."
-  (with-delayed-gc! (run-hooks 'doom-switch-buffer-hook)))
+  (unless (or (minibufferp)
+              (eq (window-old-buffer) (current-buffer)))
+    (with-delayed-gc! (run-hooks 'doom-switch-buffer-hook))))
 
 (defun doom-run-switch-window-hooks-h (&optional _)
   "Trigger `doom-switch-window-hook' when selecting a window in the same frame."
@@ -1654,7 +1656,8 @@ with `set-indent-vars!'."
 
   ;; UX: Reorder the recent files list by frecency (i.e. every time you touch a
   ;;   buffer, bump it to the top of the list).
-  (add-hook 'doom-switch-window-hook #'recentf-track-opened-file)
+  (add-hook! '(doom-switch-buffer-hook doom-switch-window-hook)
+             #'recentf-track-opened-file)
   (add-hook! 'dired-mode-hook
     (defun doom--recentf-add-dired-directory-h ()
       "Add dired directories to recentf file list."
@@ -1692,8 +1695,15 @@ with `set-indent-vars!'."
       "Strip text properties from vars to reduce size and serialization errors."
       (letf! (defun* strip-properties (tree)
                (cond ((stringp tree) (substring-no-properties tree))
-                     ((consp tree) (cons (strip-properties (car tree))
-                                         (strip-properties (cdr tree))))
+                     ((consp tree)
+                      (let* ((head (cons nil nil))
+                             (tail head))
+                        (while (consp tree)
+                          (setcdr tail (list (strip-properties (car tree))))
+                          (setq tail (cdr tail)
+                                tree (cdr tree)))
+                        (if tree (setcdr tail tree))  ; preserve dotted tails
+                        (cdr head)))
                      (tree)))
         (dolist (var (append savehist-additional-variables
                              savehist-minibuffer-history-variables))
@@ -1730,12 +1740,14 @@ the unwritable tidbits."
     :before-while #'save-place-find-file-hook
     (bobp))
 
-  (defadvice! doom--dont-prettify-saveplace-cache-a (fn)
-    "`save-place-alist-to-file' uses `pp' to prettify the contents of its cache.
+  ;;; DEPRECATED: Drop with 30.x support (emacs-mirror/emacs@c270402).
+  (when (< emacs-major-version 31)
+    (defadvice! doom--dont-prettify-saveplace-cache-a (fn)
+      "`save-place-alist-to-file' uses `pp' to prettify the contents of its cache.
 `pp' can be expensive for longer lists, and there's no reason to prettify cache
 files, so this replace calls to `pp' with the much faster `prin1'."
-    :around #'save-place-alist-to-file
-    (letf! ((#'pp #'prin1)) (funcall fn))))
+      :around #'save-place-alist-to-file
+      (letf! ((#'pp #'prin1)) (funcall fn)))))
 
 
 ;;;###package so-long
