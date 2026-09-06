@@ -256,6 +256,69 @@ Returns PROP if specified, the context otherwise."
         id))))
 
 
+;;; ** Backwards-compatible link previews
+
+(defun doom-docs--link-asset-follow (path _)
+  (find-file (doom-docs--link-asset-download path)))
+
+(defun doom-docs--link-asset-download (path)
+  "Return a local file for asset PATH, downloading URLs into the cache."
+  (if (string-match-p "\\`https?://" path)
+      (let* ((cache-dir (doom-cache-dir "doom-docs"))
+             (cache-file (doom-path cache-dir (md5 path))))
+        (unless (file-exists-p cache-file)
+          (make-directory cache-dir t)
+          (dlet ((recentf-exclude '(always))
+                 (projectile-enable-caching nil))
+            (url-copy-file path cache-file)))
+        cache-file)
+    (expand-file-name path doom-docs-dir)))
+
+(defun doom-docs--link-asset-image (path link)
+  "Return an image object for asset PATH, or nil."
+  (let ((file
+         (with-demoted-errors "Asset error: %s"
+           (doom-docs--link-asset-download path))))
+    (when (and file (file-exists-p file))
+      (if (fboundp 'org--create-inline-image)
+          (org--create-inline-image
+           file (and (fboundp 'org-display-inline-image--width)
+                     (org-display-inline-image--width link)))
+        (create-image file nil nil :max-width (window-body-width nil t))))))
+
+;; For Org 9.6-9.8
+(defun doom-docs--org-display-inline-images-a (&optional _ _ beg end)
+  "Advice for `org-display-inline-images' to display previews of asset:* links."
+  (when (display-graphic-p)
+    (org-with-point-at (or beg (point-min))
+      (let ((end (or end (point-max))))
+        (while (re-search-forward "\\[\\[asset:" end t)
+          (let ((link (save-match-data (org-element-context))))
+            (when (and (eq (org-element-type link) 'link)
+                       (equal (org-element-property :type link) "asset")
+                       (not (get-char-property (point) 'org-image-overlay)))
+              (let ((ov (make-overlay
+                         (org-element-property :begin link)
+                         (- (org-element-property :end link)
+                            (or (org-element-property :post-blank link) 0)))))
+                (if-let* ((img (doom-docs--link-asset-image
+                                (org-element-property :path link) link)))
+                    (progn
+                      (overlay-put ov 'display img)
+                      (overlay-put ov 'org-image-overlay t)
+                      (overlay-put ov 'modification-hooks '(org-display-inline-remove-overlay))
+                      (push ov org-inline-image-overlays))
+                  (overlay-put ov 'display (propertize "<image not found>" 'face 'error)))))))))))
+
+;; For Org 9.8+
+(defun doom-docs--link-asset-preview (ov path link)
+  "Preview function for asset: links (Org 9.8+ API).
+Put the image on OV and return non-nil; returning nil deletes OV."
+  (when-let* ((img (doom-docs--link-asset-image path link)))
+    (overlay-put ov 'display img)
+    t))
+
+
 ;;; ** Navbar
 
 (defun doom-docs--file-type (&optional dir)
@@ -814,7 +877,9 @@ This primes `org-mode' for reading."
                        ("\\<M-" . "Meta-")
                        ("\\<S-" . "Shift-")
                        ("\\<s-" . "super-")
-                       ("\\<C-" . "Ctrl-"))))
+                       ("\\<C-" . "Ctrl-")))
+                 ("\\[" . "[")
+                 ("\\]" . "]"))
                keystr)
     (setq keystr
           (replace-regexp-in-string (car key) (cdr key)
@@ -828,22 +893,24 @@ This primes `org-mode' for reading."
 (defun doom-docs-link--kbd-activate-func (beg end key _bracketed?)
   (if (not org-descriptive-links)
       (remove-text-properties beg end '(display nil))
-    (let* ((keystr (doom-docs-link--kbd key))
-           (total (max 0 (- (string-width key)
-                            (string-width keystr))))
-           (keybeg (save-excursion
-                     (goto-char beg)
-                     (skip-chars-forward "^:" end)
-                     (1+ (point)))))
-      ;; Hide kbd:
-      (add-text-properties
-       beg keybeg `(invisible t intangible t cursor-intangible t))
-      ;; Resolve keybinds in str:
-      (when buffer-read-only
+    ;; Hide kbd:
+    (add-text-properties
+     beg (save-excursion
+           (goto-char beg)
+           (skip-chars-forward "^:" end)
+           (1+ (point)))
+     `(invisible t intangible t cursor-intangible t))
+    ;; Resolve keybinds in str:
+    (when buffer-read-only
+      (let ((keystr (doom-docs-link--kbd key)))
         (add-text-properties
          beg end `(display
-                   ,(propertize (concat keystr (make-string total ?\s))
-                                'face 'doom-docs-kbd)))))))
+                   ,(propertize
+                     (concat keystr
+                             (make-string (max 0 (- (string-width key)
+                                                    (string-width keystr)))
+                                          ?\s))
+                     'face 'doom-docs-kbd)))))))
 
 (defun doom-docs-link--kbd-help-echo (window object pos)
   (with-selected-window window
@@ -1142,6 +1209,13 @@ This primes `org-mode' for reading."
        "sh"
        :activate-func #'doom-docs-link-activate-func
        :face 'doom-docs-shell-command)
+
+      (org-link-set-parameters "asset" :follow #'doom-docs--link-asset-follow)
+      (if (fboundp 'org-link-preview)
+          ;; Org 9.8+
+          (org-link-set-parameters "asset" :preview #'doom-docs--link-asset-preview)
+        ;; Org 9.6 – 9.8+
+        (advice-add #'org-display-inline-images :after #'doom-docs--org-display-inline-images-a))
 
       (org-link-set-parameters
        "var"
